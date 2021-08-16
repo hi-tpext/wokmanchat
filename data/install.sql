@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `__PREFIX__wok_chat_session` (
   KEY `idx_app_id` (`app_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='聊天会话';
 
-CREATE TABLE `ext_wok_chat_user` (
+CREATE TABLE `__PREFIX__wok_chat_user` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
   `app_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '应用App_id',
   `nickname` varchar(55) NOT NULL DEFAULT '' COMMENT '昵称',

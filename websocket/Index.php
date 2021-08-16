@@ -10,16 +10,24 @@ use Workerman\Lib\Timer;
 use wokmanchat\common\logic;
 use wokmanchat\common\model;
 use think\exception\ValidateException;
+use wokmanchat\common\Module;
 
 class Index extends Server
 {
     protected $socket = 'websocket://0.0.0.0:22886';
 
+    protected $option   = [
+        'name' => 'workmanchat',
+        'count' => 1,
+        'user' => 'www',
+        'group' => 'www',
+        'reloadable' => true,
+        'reusePort' => true,
+    ];
+
     public const HEARTBEAT_TIME = 60;
 
     protected $appConnections = [];
-
-    protected $innerTextWorker;
 
     /**
      * Undocumented variable
@@ -35,10 +43,22 @@ class Index extends Server
      */
     protected $userLogic;
 
-    protected function init()
+    public function __construct()
     {
+        $config = Module::getInstance()->config();
+        $this->socket = 'websocket://0.0.0.0:' . ($config['port'] ?: 22886);
+
+        Worker::$daemonize = $config['daemonize'] == 1;
         Worker::$pidFile = app()->getRuntimePath() . 'worker22886.pid';
         Worker::$logFile = app()->getRuntimePath() . 'worker22886.log';
+        Worker::$stdoutFile = app()->getRuntimePath() . 'worker22886.stdout.log';
+
+        parent::__construct();
+    }
+
+    protected function init()
+    {
+        
     }
 
     public function onMessage($connection, $data = [])

@@ -63,6 +63,17 @@ class Module  extends baseModule
     ];
 
     /**
+     * 默认的configPath()是composer模式带`src`的，extend模式没有src所以重写一下。
+     * 不重写此方法也可以，创建一个`src`目录把config.php放里面
+     *
+     * @return string
+     */
+    public function configPath()
+    {
+        return realpath($this->getRoot() . 'config.php');
+    }
+
+    /**
      * Undocumented function
      *
      * @return boolean

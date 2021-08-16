@@ -43,6 +43,10 @@ class ChatApp
             return ['code' => 0, 'msg' => 'app_id:应用未找到'];
         }
 
+        if ($app['enable'] == 0) {
+            return ['code' => 0, 'msg' => '应用未开启'];
+        }
+
         if (empty($app['secret'])) {
             return ['code' => 0, 'msg' => '系统错误，secret配置有误'];
         }

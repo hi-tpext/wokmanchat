@@ -48,17 +48,15 @@ class Index extends Server
         $config = Module::getInstance()->config();
         $this->socket = 'websocket://0.0.0.0:' . ($config['port'] ?: 22886);
 
+        $this->option['user'] = $config['user'] ?: 'www';
+        $this->option['group'] = $config['group'] ?: 'www';
+
         Worker::$daemonize = $config['daemonize'] == 1;
         Worker::$pidFile = app()->getRuntimePath() . 'worker22886.pid';
         Worker::$logFile = app()->getRuntimePath() . 'worker22886.log';
         Worker::$stdoutFile = app()->getRuntimePath() . 'worker22886.stdout.log';
 
         parent::__construct();
-    }
-
-    protected function init()
-    {
-        
     }
 
     public function onMessage($connection, $data = [])

@@ -159,7 +159,7 @@ class Wokchatmsg extends Controller
                 $d['content'] = '<label id="show-secret" class="label label-default">' . $d['content'] . '</label>';
             } else if ($d['type'] == 1) {
             } else if ($d['type'] == 2) {
-                $d['content'] = '<img src="' . $d['content'] . '" />';
+                $d['content'] = '<img style="max-width:100px;max-height:100px;" src="' . $d['content'] . '" />';
             }
         }
 

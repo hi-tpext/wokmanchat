@@ -596,8 +596,18 @@ class ChatUser
 
         $list = [];
 
+        $where = [];
+
+        $today = date('Y-m-d');
+
         foreach ($sessions as &$ses) {
             $ses['slef'] = $self;
+
+            $ses['time'] = strstr($ses['update_time'], $today) ? date('H:i', strtotime($ses['update_time'])) : date('m-d H:i', strtotime($ses['update_time']));
+
+            if ($ses['last_msg']) {
+                $ses['last_msg']['time'] = strstr($ses['last_msg']['create_time'], $today) ? date('H:i', strtotime($ses['last_msg']['create_time'])) : date('m-d H:i', strtotime($ses['last_msg']['create_time']));
+            }
 
             if ($ses['sys_uid1'] == $self['id']) {
                 $ses['that'] = $this->getUserBySysId($ses['sys_uid2']);
@@ -610,6 +620,31 @@ class ChatUser
                     continue;
                 }
             }
+            //
+
+            $where = [];
+            $where[] = ['app_id', '=', $this->app_id];
+
+            if ($ses['is_room']) {
+
+                $sys_to_uid = $this->getSysToUid($this->sys_uid, $ses);
+
+                if (!$sys_to_uid) {
+                    return ['code' => 0, 'msg' => '参数错误'];
+                }
+
+                $where[] = ['sys_to_uid', '=', $sys_to_uid];
+            } else {
+                $where[] = ['session_id', '=', $ses['id']];
+            }
+
+            if ($ses['sys_uid1'] == $this->sys_uid) {
+                $where[] = ['id', '>', $ses['last_read_id1']];
+            } else {
+                $where[] = ['id', '=', $ses['last_read_id2']];
+            }
+
+            $ses['new_msg_count'] = model\WokChatMsg::where($where)->count();
 
             $list[] = $ses;
         }
@@ -659,6 +694,7 @@ class ChatUser
      * @param array $session_id
      * @param boolean $is_history
      * @param int $from_msg_id
+     * @param int $pagesize
      * @return array
      */
     public function getMessageList($session_id, $is_history = false, $from_msg_id = 0, $pagesize = 10)
@@ -714,27 +750,97 @@ class ChatUser
             $orderBy = 'id asc';
         }
 
-        if ($session['is_room']) {
-            $messages = model\WokChatMsg::where($where)
-                ->with(['fromUser'])
-                ->order($orderBy)
-                ->limit(0, $pagesize)
-                ->select();
-        } else {
-            $messages = model\WokChatMsg::where($where)
-                ->with(['fromUser'])
-                ->order($orderBy)
-                ->limit(0, $pagesize)
-                ->select();
-        }
+        $messages = model\WokChatMsg::where($where)->with(['fromUser'])->order($orderBy)->limit(0, $pagesize)->select();
+
+        $ids = [];
+
+        $today = date('Y-m-d');
 
         foreach ($messages as &$msg) {
             $msg['self'] = $self;
+            $msg['time'] = strstr($msg['create_time'], $today) ? date('H:i', strtotime($msg['create_time'])) : date('m-d H:i', strtotime($msg['create_time']));
+            if ($msg['type'] == 4) {
+                $msg['content'] = json_decode($msg['content'], true); //自定义内容，转换为json
+            }
+            $ids[] = $msg['id'];
+        }
+
+        if (count($ids)) {
+
+            $maxId = max($ids);
+
+            if ($this->sys_uid == $session['sys_uid1']) {
+                if ($session['last_read_id1'] < $maxId) {
+                    $session['last_read_id1'] = $maxId;
+                    $session->save();
+                }
+            } else {
+                if ($session['last_read_id2'] < $maxId) {
+                    $session['last_read_id2'] = $maxId;
+                    $session->save();
+                }
+            }
         }
 
         unset($msg);
 
         return ['code' => 1, 'msg' => '成功', 'list' => $messages];
+    }
+
+    public function getNewMessageCount()
+    {
+        $valdate = $this->isValidateUser();
+
+        if ($valdate['code'] != 1) {
+            return $valdate;
+        }
+
+        $self = $this->user;
+
+        if (!$self) {
+            return ['code' => 0, 'msg' => '当前用户不能为空'];
+        }
+
+        $app_id = $this->app_id;
+        $sys_uid = $this->sys_uid;
+
+        $sessions = model\WokChatSession::where(function ($query) use ($sys_uid, $app_id) {
+            $query->where(['app_id' => $app_id, 'sys_uid1' => $sys_uid])
+                ->whereOr(['app_id' => $app_id, 'sys_uid2' => $sys_uid]);
+        })->select();
+
+        $where = [];
+        $count = 0;
+
+        foreach ($sessions as &$ses) {
+            $where = [];
+            $where[] = ['app_id', '=', $this->app_id];
+
+            if ($ses['is_room']) {
+
+                $sys_to_uid = $this->getSysToUid($this->sys_uid, $ses);
+
+                if (!$sys_to_uid) {
+                    return ['code' => 0, 'msg' => '参数错误'];
+                }
+
+                $where[] = ['sys_to_uid', '=', $sys_to_uid];
+            } else {
+                $where[] = ['session_id', '=', $ses['id']];
+            }
+
+            if ($ses['sys_uid1'] == $this->sys_uid) {
+                $where[] = ['id', '>', $ses['last_read_id1']];
+            } else {
+                $where[] = ['id', '=', $ses['last_read_id2']];
+            }
+
+            $count += model\WokChatMsg::where($where)->count();
+        }
+
+        unset($ses);
+
+        return ['code' => 1, 'msg' => '成功', 'count' => $count];
     }
 
     /**

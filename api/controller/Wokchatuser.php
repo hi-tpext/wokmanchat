@@ -73,11 +73,9 @@ class Wokchatuser extends Controller
     {
         $data = request()->post();
 
-        if (($validateApp = $this->validateUser($data)) !== true) {
-            return json([
-                'code' => 0,
-                'msg' => '用户验证失败-' . $validateApp
-            ]);
+        $valdate = $this->validateUser($data);
+        if ($valdate['code'] != 1) {
+            return json($valdate);
         }
 
         if (!isset($data['skip'])) {
@@ -288,6 +286,20 @@ class Wokchatuser extends Controller
         }
 
         $res = $this->userLogic->getMessageList($data['session_id'], false, $data['session_id'], $data['pagesize']);
+
+        return json($res);
+    }
+
+    public function getNewMessageCount()
+    {
+        $data = request()->post();
+
+        $valdate = $this->validateUser($data);
+        if ($valdate['code'] != 1) {
+            return json($valdate);
+        }
+
+        $res = $this->userLogic->getNewMessageCount();
 
         return json($res);
     }

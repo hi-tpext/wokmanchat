@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS `__PREFIX__wok_chat_session` (
   `uid1` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '用户1外部id',
   `uid2` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '用户2外部id',
   `is_room` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否为房间',
+  `last_read_id1` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '用户1已读id',
+  `last_read_id2` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '用户2已读id',
   `create_time` datetime NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT '添加时间',
   `update_time` datetime NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT '更新时间',
   `delete_time` datetime DEFAULT NULL COMMENT '删除时间',

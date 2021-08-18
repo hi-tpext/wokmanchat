@@ -18,6 +18,16 @@ composer require topthink/think-worker:^3.*
 
 ### 使用
 
+#### 修改配置
+
+`/config/worker_server.php`
+
+```php
+return [
+    'worker_class' => 'workermanchat\\websocket\\Index',
+];
+```
+
 #### 启动脚本,start.sh
 
 ```bash

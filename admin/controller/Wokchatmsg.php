@@ -2,12 +2,12 @@
 
 namespace wokmanchat\admin\controller;
 
-use wokmanchat\common\model\WokChatMsg as WokChatMsgModel;
-use wokmanchat\common\model\WokChatSession;
 use think\Controller;
-use tpext\builder\traits\actions;
 use think\facade\Lang;
 use wokmanchat\common\Module;
+use tpext\builder\traits\actions;
+use wokmanchat\common\model\WokChatSession;
+use wokmanchat\common\model\WokChatMsg as WokChatMsgModel;
 
 /**
  * @time tpextmanager 生成于2021-08-06 17:26:10
@@ -29,7 +29,9 @@ class Wokchatmsg extends Controller
     protected const MSG_TYPES = [
         0 => '系统',
         1 => '文本',
-        2 => '图片'
+        2 => '图片',
+        3 => '语音',
+        4 => '卡片'
     ];
 
     protected function initialize()
@@ -201,7 +203,29 @@ class Wokchatmsg extends Controller
 
         $form->hidden('id');
         $form->show('app_id')->to('{app_id}#{app.name}');
-        $form->raw('content');
+        if ($data['type'] == 0) {
+            $form->raw('content')->to('<label id="show-secret" class="label label-default">{val}</label>');
+        } else if ($data['type'] == 1) {
+            $form->raw('content')->to('<pre>{val}</pre>');
+        } else if ($data['type'] == 2) {
+            $form->image('content')->mediumSize();
+        } else if ($data['type'] == 3) {
+            $form->file('content');
+        } else if ($data['type'] == 4) {
+            $card = json_decode($data['content']);
+            $items = [];
+            foreach ($card['items'] as $key => $item) {
+                $items[$key] = [
+                    'id' => $key,
+                    'text' => $item
+                ];
+            }
+
+            $form->items('content')->dataWithId($items)->with(
+                $form->show('text', '内容')
+            );
+        }
+
         $form->match('type')->options(self::MSG_TYPES)->mapClassGroup([[0, 'danger'], [1, 'success'], [2, 'warning']]);
         $form->show('session_id');
         $form->show('from_uid')->to('{val}#{from_user.nickname}({from_user.remark})');
@@ -211,13 +235,6 @@ class Wokchatmsg extends Controller
 
         if ($isEdit) {
             $form->show('create_time');
-        }
-
-        if ($data['type'] == 0) {
-            $data['content'] = '<label id="show-secret" class="label label-default">' . $data['content'] . '</label>';
-        } else if ($data['type'] == 1) {
-        } else if ($data['type'] == 2) {
-            $data['content'] = '<img src="' . $data['content'] . '" />';
         }
     }
 

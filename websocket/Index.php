@@ -52,9 +52,11 @@ class Index extends Server
         $this->option['group'] = $config['group'] ?: 'www';
 
         Worker::$daemonize = $config['daemonize'] == 1;
-        Worker::$pidFile = app()->getRuntimePath() . 'worker22886.pid';
-        Worker::$logFile = app()->getRuntimePath() . 'worker22886.log';
-        Worker::$stdoutFile = app()->getRuntimePath() . 'worker22886.stdout.log';
+        Worker::$pidFile = app()->getRuntimePath() . 'worker' . $config['port'] . '.pid';
+        Worker::$logFile = app()->getRuntimePath() . 'worker' . $config['port'] . '.log';
+        Worker::$stdoutFile = app()->getRuntimePath() . 'worker' . $config['port'] . '.stdout.log';
+
+        Log::init(['type' => 'File', 'path' => app()->getRuntimePath() . 'log' . DIRECTORY_SEPARATOR . 'worker']);
 
         parent::__construct();
     }

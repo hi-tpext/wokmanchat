@@ -639,7 +639,7 @@ class ChatUser
             if ($ses['sys_uid1'] == $this->sys_uid) {
                 $where[] = ['id', '>', $ses['last_read_id1']];
             } else {
-                $where[] = ['id', '=', $ses['last_read_id2']];
+                $where[] = ['id', '>', $ses['last_read_id2']];
             }
 
             $ses['new_msg_count'] = model\WokChatMsg::where($where)->count();
@@ -827,7 +827,7 @@ class ChatUser
             if ($ses['sys_uid1'] == $this->sys_uid) {
                 $where[] = ['id', '>', $ses['last_read_id1']];
             } else {
-                $where[] = ['id', '=', $ses['last_read_id2']];
+                $where[] = ['id', '>', $ses['last_read_id2']];
             }
 
             $count += model\WokChatMsg::where($where)->count();

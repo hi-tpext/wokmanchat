@@ -24,7 +24,7 @@ composer require topthink/think-worker:^3.*
 
 ```php
 return [
-    'worker_class' => 'workermanchat\\websocket\\Index',
+    'worker_class' => 'wokmanchat\\websocket\\Index',
 ];
 ```
 

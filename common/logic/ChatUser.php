@@ -586,7 +586,7 @@ class ChatUser
         $app_id = $this->app_id;
         $sys_uid = $this->sys_uid;
 
-        $sessions = model\WokChatSession::whereRaw('app_id = :app_id and (sys_uid1 = :sys_uid1 or sys_uid2 = :sys_uid2)', ['app_id' => $app_id, 'sys_uid1' => $sys_uid, 'sys_uid2' => $sys_uid])
+        $sessions = model\WokChatSession::whereRaw('app_id = :app_id and (sys_uid1 = :sys_uid1 or sys_uid2 = :sys_uid2) and last_msg_id > 0', ['app_id' => $app_id, 'sys_uid1' => $sys_uid, 'sys_uid2' => $sys_uid])
             ->order('update_time desc,rank desc')
             ->with(['lastMsg'])
             ->limit($skip, 100)
@@ -802,7 +802,7 @@ class ChatUser
         $app_id = $this->app_id;
         $sys_uid = $this->sys_uid;
 
-        $sessions = model\WokChatSession::whereRaw('app_id = :app_id and (sys_uid1 = :sys_uid1 or sys_uid2 = :sys_uid2)', ['app_id' => $app_id, 'sys_uid1' => $sys_uid, 'sys_uid2' => $sys_uid])->select();
+        $sessions = model\WokChatSession::whereRaw('app_id = :app_id and (sys_uid1 = :sys_uid1 or sys_uid2 = :sys_uid2) and last_msg_id > 0', ['app_id' => $app_id, 'sys_uid1' => $sys_uid, 'sys_uid2' => $sys_uid])->select();
 
         $where = [];
         $count = 0;

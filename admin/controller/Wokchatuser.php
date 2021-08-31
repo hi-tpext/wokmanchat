@@ -16,6 +16,7 @@ class Wokchatuser extends Controller
 {
     use actions\HasBase;
     use actions\HasIndex;
+    use actions\HasAdd;
     use actions\HasEdit;
     use actions\HasView;
 
@@ -103,6 +104,7 @@ class Wokchatuser extends Controller
         $table->show('update_time');
 
         $table->getToolbar()
+            ->btnAdd()
             ->btnRefresh();
 
         $table->getActionbar()
@@ -124,13 +126,13 @@ class Wokchatuser extends Controller
 
         $form->hidden('id');
 
+        $form->text('uid')->required();
+        $form->select('app_id')->dataUrl(url('/admin/wokchatapp/selectpage'))->required();
         $form->text('nickname')->maxlength(55)->required();
         $form->image('avatar')->required();
         $form->text('remark')->maxlength(55)->required();
 
         if ($isEdit) {
-            $form->show('app_id');
-            $form->show('uid');
             $form->show('room_owner_uid')->to('{roomOwner.nickname}');
             $form->show('create_time');
             $form->show('update_time');
@@ -149,7 +151,8 @@ class Wokchatuser extends Controller
         $result = $this->validate($data, [
             'nickname|昵称' => 'require',
             'avatar|头像' => 'require',
-            'remark|备注' => 'require',
+            'uid|用户uid' => 'require',
+            'app_id|应用app_id' => 'require',
         ]);
 
         if (true !== $result) {

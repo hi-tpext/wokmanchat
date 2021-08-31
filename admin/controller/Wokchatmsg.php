@@ -150,7 +150,7 @@ class Wokchatmsg extends Controller
 
         $table->raw('content');
 
-        $table->match('type')->options(self::MSG_TYPES)->mapClassGroup([[0, 'danger'], [1, 'success'], [2, 'warning']]);
+        $table->match('type')->options(self::MSG_TYPES)->mapClassGroup([[0, 'danger'], [1, 'success'], [2, 'warning'], [3, 'info'], [4, 'default']]);
 
         if (!$session_id) {
             $table->show('session_id');

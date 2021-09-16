@@ -61,7 +61,7 @@ class Index extends Server
         parent::__construct();
     }
 
-    public function onMessage($connection, $data = [])
+    public function onMessage($connection, $data = '{}')
     {
         $connection->lastMessageTime = time();
 
@@ -434,6 +434,17 @@ class Index extends Server
                 }
             }
         });
+    }
+
+    public function onWebSocketConnect($connection)
+    {
+        //解决微信h5连接wss协议时报错:during WebSocket handshake: Sent non-empty 'Sec-WebSocket-Protocol' header but no response was received
+        if (isset($_SERVER['HTTP_SEC_WEBSOCKET_PROTOCOL'])) {
+            $protocols = explode(',', $_SERVER['HTTP_SEC_WEBSOCKET_PROTOCOL']);
+            $connection->headers = [
+                'Sec-WebSocket-Protocol: ' . $protocols[0],
+            ];
+        }
     }
 
     public function onConnect($connection)

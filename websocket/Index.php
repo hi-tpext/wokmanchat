@@ -417,7 +417,7 @@ class Index extends Server
     {
         Timer::add(10, function () use ($worker) {
 
-            db()->query('show tables'); //保存数据库连接
+            model\WokChatUser::where('id', 1)->find(); //保存数据库连接
 
             $timeNow = time();
             foreach ($worker->connections as $connection) {

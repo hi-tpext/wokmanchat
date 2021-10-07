@@ -7,13 +7,13 @@
 #### tp5.1
 
 ```bash
-composer require topthink/think-worker:^2.*
+composer require topthink/think-worker:^2.0
 ```
 
 #### tp6.0
 
 ```bash
-composer require topthink/think-worker:^3.*
+composer require topthink/think-worker:^3.0
 ```
 
 ### 使用
@@ -24,7 +24,7 @@ composer require topthink/think-worker:^3.*
 
 ```php
 return [
-    'worker_class' => 'wokmanchat\\websocket\\Index',
+    'worker_class' => ['wokmanchat\\websocket\\Index'],
 ];
 ```
 

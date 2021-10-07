@@ -6,7 +6,6 @@ use tpext\common\Module as baseModule;
 use tpext\common\ExtLoader;
 
 /**
- * 继承 Module 和 Resource都可以，考虑到以后的扩展性（比如提供OSS文件的管里等功能），使用Module
  * Undocumented class
  */
 class Module  extends baseModule

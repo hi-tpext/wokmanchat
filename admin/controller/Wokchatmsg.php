@@ -44,7 +44,7 @@ class Wokchatmsg extends Controller
         $this->pagesize = 14;
         $this->sortOrder = 'id desc';
 
-        $this->indexWith = ['fromUser', 'toUser'];
+        $this->indexWith = ['fromUser', 'toUser', 'app'];
 
         Lang::load(Module::getInstance()->getRoot() . implode(DIRECTORY_SEPARATOR, ['admin', 'lang', config('default_lang'), 'wokchatmsg' . '.php']));
     }

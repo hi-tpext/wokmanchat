@@ -36,7 +36,7 @@ class Wokchatuser extends Controller
         $this->pagesize = 14;
         $this->sortOrder = 'id desc';
 
-        $this->indexWith = ['roomOwner'];
+        $this->indexWith = ['roomOwner', 'app'];
 
         Lang::load(Module::getInstance()->getRoot() . implode(DIRECTORY_SEPARATOR, ['admin', 'lang', config('default_lang'), 'wokchatuser' . '.php']));
     }

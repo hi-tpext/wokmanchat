@@ -4,6 +4,8 @@ namespace wokmanchat\api\controller;
 
 use think\Controller;
 use wokmanchat\common\logic\ChatApp;
+use wokmanchat\common\logic\ChatUser;
+use wokmanchat\common\model;
 
 class Wokchatadmin extends Controller
 {
@@ -14,9 +16,17 @@ class Wokchatadmin extends Controller
      */
     protected $appLogic;
 
+    /**
+     * Undocumented variable
+     *
+     * @var ChatUser
+     */
+    protected $userLogic;
+
     protected function initialize()
     {
         $this->appLogic = new ChatApp;
+        $this->userLogic = new ChatUser;
     }
 
     /**
@@ -217,6 +227,179 @@ class Wokchatadmin extends Controller
         }
 
         $res = $this->appLogic->editUserAvatar($data['uid'], $data['avatar']);
+
+        return json($res);
+    }
+
+    public function getSessionList()
+    {
+        $data = request()->post();
+
+        $valdate = $this->validateApp($data);
+        if ($valdate['code'] != 1) {
+            return json($valdate);
+        }
+
+        $result = $this->validate($data, [
+            'uid|当前用户uid' => 'require|number',
+        ]);
+
+        if ($result !== true) {
+            return json([
+                'code' => 0,
+                'msg' => $result
+            ]);
+        }
+
+        if (!isset($data['skip'])) {
+            $data['skip'] = 0;
+        }
+        if (!isset($data['kwd'])) {
+            $data['kwd'] = '';
+        }
+
+        $user = model\WokChatUser::where(['app_id' => $this->app_id, 'uid' => $data['uid']])->find();
+
+        if (!$user) {
+            return json([
+                'code' => 0,
+                'msg' => '用户不存在:' . $data['uid']
+            ]);
+        }
+
+        $this->userLogic->switchUser($user);
+
+        $res = $this->userLogic->getSessionList($data['skip'], $data['kwd']);
+
+        return json($res);
+    }
+
+    public function getHistoryMessageList()
+    {
+        $data = request()->post();
+
+        $valdate = $this->validateApp($data);
+        if ($valdate['code'] != 1) {
+            return json($valdate);
+        }
+
+        $result = $this->validate($data, [
+            'uid|当前用户uid' => 'require|number',
+            'session_id|会话id' => 'require|number',
+            'from_msg_id' => 'number',
+            'pagesize' => 'number',
+        ]);
+
+        if ($result !== true) {
+            return json([
+                'code' => 0,
+                'msg' => $result
+            ]);
+        }
+
+        if (!isset($data['from_msg_id'])) {
+            $data['from_msg_id'] = 0;
+        }
+
+        if (!isset($data['pagesize'])) {
+            $data['pagesize'] = 10;
+        }
+
+        $user = model\WokChatUser::where(['app_id' => $this->app_id, 'uid' => $data['uid']])->find();
+
+        if (!$user) {
+            return json([
+                'code' => 0,
+                'msg' => '用户不存在:' . $data['uid']
+            ]);
+        }
+
+        $this->userLogic->switchUser($user);
+
+        $res = $this->userLogic->getMessageList($data['session_id'], true, $data['session_id'], $data['pagesize']);
+
+        return json($res);
+    }
+
+    public function getNewMessageList()
+    {
+        $data = request()->post();
+
+        $valdate = $this->validateApp($data);
+        if ($valdate['code'] != 1) {
+            return json($valdate);
+        }
+
+        $result = $this->validate($data, [
+            'uid|当前用户uid' => 'require|number',
+            'session_id|会话id' => 'require|number',
+            'from_msg_id' => 'number',
+            'pagesize' => 'number',
+        ]);
+
+        if ($result !== true) {
+            return json([
+                'code' => 0,
+                'msg' => $result
+            ]);
+        }
+
+        if (!isset($data['from_msg_id'])) {
+            $data['from_msg_id'] = 0;
+        }
+
+        if (!isset($data['pagesize'])) {
+            $data['pagesize'] = 10;
+        }
+
+        $user = model\WokChatUser::where(['app_id' => $this->app_id, 'uid' => $data['uid']])->find();
+
+        if (!$user) {
+            return json([
+                'code' => 0,
+                'msg' => '用户不存在:' . $data['uid']
+            ]);
+        }
+
+        $this->userLogic->switchUser($user);
+
+        $res = $this->userLogic->getMessageList($data['session_id'], false, $data['session_id'], $data['pagesize']);
+
+        return json($res);
+    }
+
+    public function getNewMessageCount()
+    {
+        $data = request()->post();
+
+        $valdate = $this->validateApp($data);
+        if ($valdate['code'] != 1) {
+            return json($valdate);
+        }
+
+        $result = $this->validate($data, [
+            'uid|当前用户uid' => 'require|number',
+        ]);
+
+        if ($result !== true) {
+            return json([
+                'code' => 0,
+                'msg' => $result
+            ]);
+        }
+
+        $user = model\WokChatUser::where(['app_id' => $this->app_id, 'uid' => $data['uid']])->find();
+
+        if (!$user) {
+            return json([
+                'code' => 0,
+                'msg' => '用户不存在:' . $data['uid']
+            ]);
+        }
+
+        $this->userLogic->switchUser($user);
+
+        $res = $this->userLogic->getNewMessageCount();
 
         return json($res);
     }

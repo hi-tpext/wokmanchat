@@ -50,7 +50,7 @@ CREATE TABLE `__PREFIX__wok_chat_user` (
   `nickname` varchar(55) NOT NULL DEFAULT '' COMMENT '昵称',
   `avatar` varchar(200) NOT NULL DEFAULT '' COMMENT '头像',
   `remark` varchar(55) NOT NULL DEFAULT '' COMMENT '备注',
-  `token` varchar(55) NOT NULL DEFAULT '' COMMENT 'token',
+  `token` varchar(100) NOT NULL DEFAULT '' COMMENT 'token',
   `uid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '会员外部id',
   `room_owner_uid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '房间管理员',
   `login_time` datetime NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT '登录时间',

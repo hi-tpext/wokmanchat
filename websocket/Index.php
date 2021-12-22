@@ -415,9 +415,11 @@ class Index extends Server
      */
     protected function heartBeat($worker)
     {
-        Timer::add(10, function () use ($worker) {
-
+        Timer::add(5, function () {
             model\WokChatUser::where('id', 1)->find(); //保存数据库连接
+        });
+
+        Timer::add(10, function () use ($worker) {
 
             $timeNow = time();
             foreach ($worker->connections as $connection) {

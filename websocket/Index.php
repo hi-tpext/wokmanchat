@@ -11,6 +11,7 @@ use wokmanchat\common\logic;
 use wokmanchat\common\model;
 use think\exception\ValidateException;
 use wokmanchat\common\Module;
+use think\Db;
 
 class Index extends Server
 {
@@ -84,6 +85,8 @@ class Index extends Server
 
     public function onWorkerStart($worker)
     {
+        Log::info("onWorkerStart");
+        Db::connect(false, true);
         $this->appLogic = new logic\ChatApp;
         $this->userLogic = new logic\ChatUser;
 
@@ -460,12 +463,19 @@ class Index extends Server
 
     public function onClose($connection)
     {
+        Log::info("onClose");
         if (isset($connection->app_id) && isset($connection->uid)) {
             // 连接断开时删除映射
             unset($this->appConnections[$connection->app_id][$connection->uid]);
 
             $connection->uid = 0;
         }
+    }
+
+    public function onWorkerReload($worker)
+    {
+        Log::info("onWorkerReload");
+        Db::connect(false, true);
     }
 
     /**

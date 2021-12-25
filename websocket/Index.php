@@ -2,16 +2,17 @@
 
 namespace wokmanchat\websocket;
 
+use think\Db;
 use \think\Validate;
 use think\facade\Log;
 use Workerman\Worker;
 use think\worker\Server;
 use Workerman\Lib\Timer;
+use tpext\common\ExtLoader;
 use wokmanchat\common\logic;
 use wokmanchat\common\model;
-use think\exception\ValidateException;
 use wokmanchat\common\Module;
-use think\Db;
+use think\exception\ValidateException;
 
 class Index extends Server
 {
@@ -86,7 +87,13 @@ class Index extends Server
     public function onWorkerStart($worker)
     {
         Log::info("onWorkerStart");
-        Db::connect(false, true);
+
+        if (ExtLoader::isTP51()) {
+            Db::connect([], 'wokmanchat' . date('YmdHi'));
+        } else if (ExtLoader::isTP60()) {
+            Db::connect('wokmanchat', true);
+        }
+
         $this->appLogic = new logic\ChatApp;
         $this->userLogic = new logic\ChatUser;
 
@@ -475,7 +482,12 @@ class Index extends Server
     public function onWorkerReload($worker)
     {
         Log::info("onWorkerReload");
-        Db::connect(false, true);
+
+        if (ExtLoader::isTP51()) {
+            Db::connect([], 'wokmanchat' . date('YmdHi'));
+        } else if (ExtLoader::isTP60()) {
+            Db::connect('wokmanchat', true);
+        }
     }
 
     /**

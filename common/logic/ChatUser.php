@@ -247,6 +247,20 @@ class ChatUser
         return ['code' => 1, 'msg' => '会话创建成功', 'session_id' => $session['id'], 'session' => $session, 'toUser' => $toUser];
     }
 
+    // 过滤掉emoji表情
+    protected function filterEmoji($str)
+    {
+        $str = preg_replace_callback(    //执行一个正则表达式搜索并且使用一个回调进行替换
+            '/./u',
+            function (array $match) {
+                return strlen($match[0]) >= 4 ? '?' : $match[0];
+            },
+            $str
+        );
+
+        return $str;
+    }
+
     /**
      * Undocumented function
      *
@@ -291,7 +305,7 @@ class ChatUser
             'to_uid' => $to_uid,
             'sys_from_uid' => $this->sys_uid,
             'sys_to_uid' => $sys_to_uid,
-            'content' => $content,
+            'content' => $this->filterEmoji($content),
             'session_id' => $session['id'],
             'type' => intval($type),
         ];
@@ -460,7 +474,7 @@ class ChatUser
             'to_uid' => 0,
             'sys_from_uid' => $fromUser['id'],
             'sys_to_uid' => $toRoom['id'],
-            'content' => $content,
+            'content' => $this->filterEmoji($content),
             'session_id' => $session['id'],
             'type' => 0
         ];

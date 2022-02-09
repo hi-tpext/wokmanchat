@@ -90,6 +90,20 @@ class ChatApp
         $this->app_id = $app['id'];
     }
 
+    // 过滤掉emoji表情
+    protected function filterEmoji($str)
+    {
+        $str = preg_replace_callback(    //执行一个正则表达式搜索并且使用一个回调进行替换
+            '/./u',
+            function (array $match) {
+                return strlen($match[0]) >= 4 ? '?' : $match[0];
+            },
+            $str
+        );
+
+        return $str;
+    }
+
     /**
      * Undocumented function
      *
@@ -136,8 +150,8 @@ class ChatApp
         $data = [
             'app_id' => $this->app_id,
             'uid' => $uid,
-            'nickname' => $nickname,
-            'remark' => $remark,
+            'nickname' => $this->filterEmoji($nickname),
+            'remark' => $this->filterEmoji($remark),
             'avatar' => $avatar,
             'token' => $token,
             'room_owner_uid' => 0
@@ -201,7 +215,7 @@ class ChatApp
      */
     public function editUserNickname($uid, $nickname)
     {
-        return $this->editUser($uid, ['nickname' => $nickname]);
+        return $this->editUser($uid, ['nickname' => $this->filterEmoji($nickname)]);
     }
 
     /**
@@ -213,7 +227,7 @@ class ChatApp
      */
     public function editUserRemark($uid, $remark)
     {
-        return $this->editUser($uid, ['remark' => $remark]);
+        return $this->editUser($uid, ['remark' => $this->filterEmoji($remark)]);
     }
 
     /**

@@ -19,6 +19,7 @@ class Wokchatuser extends Controller
     use actions\HasAdd;
     use actions\HasEdit;
     use actions\HasView;
+    use actions\HasDelete;
 
     /**
      * Undocumented variable
@@ -105,11 +106,13 @@ class Wokchatuser extends Controller
 
         $table->getToolbar()
             ->btnAdd()
+            ->btnDelete()
             ->btnRefresh();
 
         $table->getActionbar()
             ->btnEdit()
-            ->btnView();
+            ->btnView()
+            ->btnDelete();
 
         $table->sortable('id,app_id,uid');
     }

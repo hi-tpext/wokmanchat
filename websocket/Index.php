@@ -202,6 +202,11 @@ class Index extends Server
 
                 $res = $this->userLogic->getSessionList($data['skip'], $data['kwd']);
 
+                if ($res['code'] == 1) {
+
+                    $connection->send(json_encode(['do_action' => 'get_session_list_success', 'list' => $res['list']]));
+                }
+
                 return $res;
             } else if ($data['action'] == 'send_by_session') {
 

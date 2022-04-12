@@ -387,8 +387,11 @@ class Index extends Server
                 }
 
                 return $res;
+            } else if ($data['action'] == 'bye') {
+                $data = ['code' => 1, 'msg' => 'bye'];
+                $connection->send(json_encode($data));
+                $connection->close();
             }
-            //
             else {
                 return ['code' => 0, 'msg' => '失败-' . $data['action']];
             }

@@ -313,7 +313,12 @@ class ChatUser
         $res = $msg->save($data);
 
         if ($res) {
-            $session->save(['last_msg_id' => $msg['id']]);
+            if ($session['sys_uid1'] == $this->sys_uid) {
+                $session->save(['last_msg_id' => $msg['id'], 'last_read_id1' => $msg['id']]);
+            } else {
+                $session->save(['last_msg_id' => $msg['id'], 'last_read_id2' => $msg['id']]);
+            }
+
             return ['code' => 1, 'msg' => '消息发送成功', 'session_id' => $session['id'], 'session' => $session, 'message_id' => $msg['id'], 'message' => $msg];
         }
 

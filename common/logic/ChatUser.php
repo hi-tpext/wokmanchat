@@ -663,6 +663,10 @@ class ChatUser
 
             $ses['new_msg_count'] = model\WokChatMsg::where($where)->count();
 
+            if ($ses['lastMsg']) {
+                unset($ses['lastMsg']['app_id'], $ses['lastMsg']['create_time'], $ses['lastMsg']['update_time']);
+            }
+
             $list[] = $ses;
         }
 
@@ -763,8 +767,14 @@ class ChatUser
             }
             $orderBy = 'id desc';
         } else {
-            $where[] = ['id', '>', $from_msg_id];
-            $orderBy = 'id asc';
+            if ($from_msg_id == 0) { //读取新消息，但from_msg_id为0，读取最新的几条消息．一般打开对话后先查询历史消息．但如果错误的先调用新消息接口，会有此问题
+                $ids = model\WokChatMsg::where($where)->order('id desc')->limit(0, $pagesize)->column('id');
+                $where[] = ['id', 'in', $ids];
+                $orderBy = 'id asc';
+            } else {
+                $where[] = ['id', '>', $from_msg_id];
+                $orderBy = 'id asc';
+            }
         }
 
         $messages = model\WokChatMsg::where($where)->with(['fromUser'])->order($orderBy)->limit(0, $pagesize)->select();

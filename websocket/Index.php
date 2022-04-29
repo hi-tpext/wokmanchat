@@ -240,7 +240,7 @@ class Index extends Server
 
                 if ($res['code'] == 1) {
 
-                    $connection->send(json_encode(['do_action' => 'get_session_list_success', 'list' => $res['list']]));
+                    $connection->send(json_encode(['do_action' => 'get_session_list_success', 'list' => $res['list'], 'has_more' => $res['has_more']]));
                 }
 
                 return $res;
@@ -388,7 +388,7 @@ class Index extends Server
                 $res = $this->userLogic->getMessageList($data['session_id'], true, $data['from_msg_id'], $data['pagesize']);
 
                 if ($res['code'] == 1) {
-                    $connection->send(json_encode(['do_action' => 'get_history_list_success', 'list' => $res['list']]));
+                    $connection->send(json_encode(['do_action' => 'get_history_list_success', 'list' => $res['list'], 'has_more' => $res['has_more']]));
                 }
 
                 return $res;
@@ -419,7 +419,7 @@ class Index extends Server
                 $res = $this->userLogic->getMessageList($data['session_id'], false, $data['from_msg_id'], $data['pagesize']);
 
                 if ($res['code'] == 1) {
-                    $connection->send(json_encode(['do_action' => 'get_new_message_list_success', 'list' => $res['list']]));
+                    $connection->send(json_encode(['do_action' => 'get_new_message_list_success', 'list' => $res['list'], 'has_more' => $res['has_more']]));
                 }
 
                 return $res;

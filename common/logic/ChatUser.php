@@ -773,8 +773,6 @@ class ChatUser
 
         $today = date('Y-m-d');
 
-
-
         foreach ($messages as &$msg) {
             $msg['time'] = strstr($msg['create_time'], $today) ? date('H:i', strtotime($msg['create_time'])) : date('m-d H:i', strtotime($msg['create_time']));
             if ($msg['type'] == 4) {

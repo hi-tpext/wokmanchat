@@ -14,6 +14,7 @@ use wokmanchat\common\logic;
 use wokmanchat\common\model;
 use wokmanchat\common\Module;
 use think\exception\ValidateException;
+use Workerman\Connection\TcpConnection;
 
 class Index extends Server
 {
@@ -125,6 +126,9 @@ class Index extends Server
                         $this->appConnections[$data['app_id']] = [];
                     } else {
                         if (isset($this->appConnections[$data['app_id']][$data['uid']])) { //重复登陆
+
+                            $connection->send(json_encode(['do_action' => 'login_duplication'])); //发送信号提示
+
                             $this->appConnections[$data['app_id']][$data['uid']]->close();
                             unset($this->appConnections[$data['app_id']][$data['uid']]);
                         }
@@ -455,6 +459,12 @@ class Index extends Server
         });
     }
 
+    /**
+     * Undocumented function
+     *
+     * @param TcpConnection $connection
+     * @return void
+     */
     public function onWebSocketConnect($connection)
     {
         //解决微信h5连接wss协议时报错:during WebSocket handshake: Sent non-empty 'Sec-WebSocket-Protocol' header but no response was received
@@ -466,8 +476,16 @@ class Index extends Server
         }
     }
 
+    /**
+     * Undocumented function
+     *
+     * @param TcpConnection $connection
+     * @return void
+     */
     public function onConnect($connection)
     {
+        $connection->maxSendBufferSize = 4 * 1024 * 1024; //4MB，防止数据截断(默认1MB)
+
         // 临时给$connection对象添加一个auth_timer_id属性存储定时器id
         // 定时10秒关闭连接，需要客户端10秒内完成用户登陆验证
         $connection->auth_timer_id = Timer::add(10, function () use ($connection) {
@@ -475,6 +493,12 @@ class Index extends Server
         }, null, false);
     }
 
+    /**
+     * Undocumented function
+     *
+     * @param TcpConnection $connection
+     * @return void
+     */
     public function onClose($connection)
     {
         if (isset($connection->app_id) && isset($connection->uid)) {
@@ -494,7 +518,7 @@ class Index extends Server
 
     /**
      * 当客户端的连接上发生错误时触发
-     * @param mixed $connection
+     * @param TcpConnection $connection
      * @param string $code
      * @param string $msg
      */
@@ -506,7 +530,7 @@ class Index extends Server
     /**
      * Undocumented function
      *
-     * @param mixed $connection
+     * @param TcpConnection $connection
      * @param mixed $res
      * @return void
      */

@@ -84,9 +84,11 @@ class Wokchatuser extends Controller
         if (!isset($data['kwd'])) {
             $data['kwd'] = '';
         }
+        if (!isset($data['pagesize'])) {
+            $data['pagesize'] = 20;
+        }
 
-
-        $res = $this->userLogic->getSessionList($data['skip'], $data['kwd']);
+        $res = $this->userLogic->getSessionList($data['skip'], $data['pagesize'], $data['kwd']);
 
         return json($res);
     }

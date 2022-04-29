@@ -199,8 +199,11 @@ class Index extends Server
                 if (!isset($data['kwd'])) {
                     $data['kwd'] = '';
                 }
+                if (!isset($data['pagesize'])) {
+                    $data['pagesize'] = 20;
+                }
 
-                $res = $this->userLogic->getSessionList($data['skip'], $data['kwd']);
+                $res = $this->userLogic->getSessionList($data['skip'], $data['pagesize'], $data['kwd']);
 
                 if ($res['code'] == 1) {
 
@@ -391,8 +394,7 @@ class Index extends Server
                 $data = ['code' => 1, 'msg' => 'bye'];
                 $connection->send(json_encode($data));
                 $connection->close();
-            }
-            else {
+            } else {
                 return ['code' => 0, 'msg' => '失败-' . $data['action']];
             }
         }

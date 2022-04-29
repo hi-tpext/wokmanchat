@@ -585,10 +585,11 @@ class ChatUser
      * Undocumented function
      *
      * @param int $skip
+     * @param int $pagesize
      * @param string $kwd
      * @return array
      */
-    public function getSessionList($skip = 0, $kwd = '')
+    public function getSessionList($skip = 0, $pagesize = 20, $kwd = '')
     {
         $valdate = $this->isValidateUser();
 
@@ -608,7 +609,7 @@ class ChatUser
         $sessions = model\WokChatSession::whereRaw('app_id = :app_id and (sys_uid1 = :sys_uid1 or sys_uid2 = :sys_uid2) and last_msg_id > 0', ['app_id' => $app_id, 'sys_uid1' => $sys_uid, 'sys_uid2' => $sys_uid])
             ->order('last_msg_id desc,rank desc')
             ->with(['lastMsg'])
-            ->limit($skip, 100)
+            ->limit($skip, $pagesize)
             ->select();
 
         $list = [];
@@ -618,7 +619,6 @@ class ChatUser
         $today = date('Y-m-d');
 
         foreach ($sessions as &$ses) {
-            $ses['slef'] = $self;
 
             $ses['time'] = strstr($ses['update_time'], $today) ? date('H:i', strtotime($ses['update_time'])) : date('m-d H:i', strtotime($ses['update_time']));
 
@@ -668,7 +668,7 @@ class ChatUser
 
         unset($ses);
 
-        return ['code' => 1, 'msg' => '成功', 'list' => $list];
+        return ['code' => 1, 'msg' => '成功', 'list' => $list, 'has_more' => count($list) >= $pagesize];
     }
 
     /**
@@ -773,13 +773,18 @@ class ChatUser
 
         $today = date('Y-m-d');
 
+
+
         foreach ($messages as &$msg) {
-            $msg['self'] = $self;
             $msg['time'] = strstr($msg['create_time'], $today) ? date('H:i', strtotime($msg['create_time'])) : date('m-d H:i', strtotime($msg['create_time']));
             if ($msg['type'] == 4) {
                 $msg['content'] = json_decode($msg['content'], true); //自定义内容，转换为json
             }
             $ids[] = $msg['id'];
+
+            if ($msg['fromUser']) {
+                unset($msg['fromUser']['app_id'], $msg['fromUser']['login_time'], $msg['fromUser']['create_time'], $msg['fromUser']['update_time']);
+            }
         }
 
         if (count($ids)) {
@@ -801,7 +806,7 @@ class ChatUser
 
         unset($msg);
 
-        return ['code' => 1, 'msg' => '成功', 'list' => $messages];
+        return ['code' => 1, 'msg' => '成功', 'list' => $messages, 'has_more' => count($messages) >= $pagesize];
     }
 
     public function getNewMessageCount()

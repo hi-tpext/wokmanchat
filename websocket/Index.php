@@ -127,7 +127,9 @@ class Index extends Server
                     } else {
                         if (isset($this->appConnections[$data['app_id']][$data['uid']])) { //重复登陆
 
-                            $connection->send(json_encode(['do_action' => 'login_duplication'])); //发送信号提示
+                            $connection->send(json_encode(['do_action' => 'show_toast', 'text' => '您的账号在其他地方登录，您已下线．']));
+
+                            $connection->send(json_encode(['do_action' => 'login_duplication'])); //发送信号提示，前端不要重复登录
 
                             $this->appConnections[$data['app_id']][$data['uid']]->close();
                             unset($this->appConnections[$data['app_id']][$data['uid']]);

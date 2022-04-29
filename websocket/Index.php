@@ -65,6 +65,13 @@ class Index extends Server
         parent::__construct();
     }
 
+    /**
+     * Undocumented function
+     *
+     * @param TcpConnection $connection
+     * @param string $data
+     * @return void
+     */
     public function onMessage($connection, $data = '{}')
     {
         $connection->lastMessageTime = time();
@@ -98,6 +105,13 @@ class Index extends Server
         $this->heartBeat($worker);
     }
 
+    /**
+     * Undocumented function
+     *
+     * @param TcpConnection $connection
+     * @param string $data
+     * @return array
+     */
     protected function handler($connection, $data = '{}')
     {
         $data = json_decode($data, true);
@@ -123,26 +137,39 @@ class Index extends Server
                 if ($res['code'] == 1) {
 
                     if (!isset($this->appConnections[$data['app_id']])) {
-                        $this->appConnections[$data['app_id']] = [];
+                        $this->appConnections[$data['app_id']] = [
+                            $data['uid'] => [],
+                        ];
                     } else {
-                        if (isset($this->appConnections[$data['app_id']][$data['uid']])) { //重复登陆
+                        if (isset($this->appConnections[$data['app_id']][$data['uid']]) && count($this->appConnections[$data['app_id']][$data['uid']]) > 1) { //重复登陆
 
-                            $connection->send(json_encode(['do_action' => 'show_toast', 'text' => '您的账号在其他地方登录，您已下线．']));
+                            if (Module::config('login_duplication') != 1) { //不允许多点重复登录
 
-                            $connection->send(json_encode(['do_action' => 'login_duplication'])); //发送信号提示，前端不要重复登录
+                                $oldConnections = $this->appConnections[$data['app_id']][$data['uid']];
 
-                            $this->appConnections[$data['app_id']][$data['uid']]->close();
-                            unset($this->appConnections[$data['app_id']][$data['uid']]);
+                                foreach ($oldConnections as $oldConn) {
+                                    $oldConn->send(json_encode(['do_action' => 'show_toast', 'text' => '您的账号在其他地方登录，您已下线．']));
+
+                                    $oldConn->send(json_encode(['do_action' => 'login_duplication'])); //发送信号提示，前端不要自动重新登录
+
+                                    $oldConn->close();
+
+                                    unset($this->appConnections[$data['app_id']][$data['uid']][$oldConn->id]);
+                                }
+
+                                $this->appConnections[$data['app_id']][$data['uid']] = [];
+                            }
                         }
                     }
 
                     $self = $this->userLogic->getSelf();
 
                     $connection->app_id = $self['app_id'];
-                    $connection->uid = $self['uid'];
+                    $connection->uid = $data['uid'];
                     $connection->sys_uid = $self['id'];
 
-                    $this->appConnections[$self['app_id']][$self['uid']] = $connection;
+                    // $connection->id 为`workerman`框架自带属性
+                    $this->appConnections[$self['app_id']][$data['uid']][$connection->id] = $connection;
 
                     Timer::del($connection->auth_timer_id); //验证成功，删除定时器，防止连接被关闭
 
@@ -505,7 +532,10 @@ class Index extends Server
     {
         if (isset($connection->app_id) && isset($connection->uid)) {
             // 连接断开时删除映射
-            unset($this->appConnections[$connection->app_id][$connection->uid]);
+
+            // $connection->id 为`workerman`框架自带属性
+
+            unset($this->appConnections[$connection->app_id][$connection->uid][$connection->id]);
 
             $connection->uid = 0;
         }
@@ -570,8 +600,12 @@ class Index extends Server
 
         if (isset($this->appConnections[$app_id]) && isset($this->appConnections[$app_id][$uid])) {
 
-            $connection = $this->appConnections[$app_id][$uid];
-            $connection->send($message);
+            $userConnections = $this->appConnections[$app_id][$uid];
+
+            foreach ($userConnections as $conn) {
+                $conn->send($message);
+            }
+
             return true;
         }
     }

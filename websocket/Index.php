@@ -576,11 +576,11 @@ class Index extends Server
             $uids = $this->userLogic->getRoomSessionUsers($session['sys_to_uid']); //获取群聊相关的所有人员uid列表
 
             foreach ($uids as $uid) {
-                $this->sendMessageByUid($session['app_id'], $uid, ['do_action' => 'new_message', 'session' => $session]);
+                $this->sendMessageByUid($session['app_id'], $uid, ['do_action' => 'new_message', 'session' => $session, 'from_uid' => $connection->uid]);
             }
         } else {
-            $this->sendMessageByUid($session['app_id'], $session['uid1'], ['do_action' => 'new_message', 'session' => $session]);
-            $this->sendMessageByUid($session['app_id'], $session['uid2'], ['do_action' => 'new_message', 'session' => $session]);
+            $this->sendMessageByUid($session['app_id'], $session['uid1'], ['do_action' => 'new_message', 'session' => $session, 'from_uid' => $connection->uid]);
+            $this->sendMessageByUid($session['app_id'], $session['uid2'], ['do_action' => 'new_message', 'session' => $session, 'from_uid' => $connection->uid]);
         }
     }
 

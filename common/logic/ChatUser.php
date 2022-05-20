@@ -61,7 +61,7 @@ class ChatUser
             return ['code' => 0, 'msg' => '参数错误'];
         }
 
-        if (time() - $time > 10) {
+        if (abs(time() - $time) > 10) {
             return ['code' => 0, 'msg' => 'sign超时请检查设备时间'];
         }
 

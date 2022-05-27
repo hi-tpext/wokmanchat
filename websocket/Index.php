@@ -49,7 +49,7 @@ class Index extends Server
 
     public function __construct()
     {
-        $config = Module::getInstance()->config();
+        $config = Module::getInstance()->getConfig();
         $this->socket = 'websocket://0.0.0.0:' . ($config['port'] ?: 22886);
 
         $this->option['user'] = $config['user'] ?: 'www';

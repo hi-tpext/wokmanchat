@@ -4,6 +4,7 @@ namespace wokmanchat\common\logic;
 
 use wokmanchat\common\model;
 use think\Db;
+use wokmanchat\common\Module;
 
 /**
  * 封装前台操作，用户聊天
@@ -22,6 +23,13 @@ class ChatUser
      * @var model\WokChatUser
      */
     protected $user = null;
+
+    protected $config = [];
+
+    public function __construct()
+    {
+        $this->config = Module::getInstance()->getConfig();
+    }
 
     /**
      * 重置用户状态
@@ -61,7 +69,13 @@ class ChatUser
             return ['code' => 0, 'msg' => '参数错误'];
         }
 
-        if (abs(time() - $time) > 10) {
+        $sign_timeout = intval($this->config['sign_timeout'] ?? 60);
+
+        if ($sign_timeout < 10) {
+            $sign_timeout = 10;
+        }
+
+        if (abs(time() - $time) > $sign_timeout) {
             return ['code' => 0, 'msg' => 'sign超时请检查设备时间'];
         }
 

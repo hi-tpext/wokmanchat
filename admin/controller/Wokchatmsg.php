@@ -212,18 +212,7 @@ class Wokchatmsg extends Controller
         } else if ($data['type'] == 3) {
             $form->file('content');
         } else if ($data['type'] == 4) {
-            $card = json_decode($data['content']);
-            $items = [];
-            foreach ($card['items'] as $key => $item) {
-                $items[$key] = [
-                    'id' => $key,
-                    'text' => $item
-                ];
-            }
-
-            $form->items('content')->dataWithId($items)->with(
-                $form->show('text', '内容')
-            );
+            $form->raw('content')->to('<pre>{val}</pre>');
         }
 
         $form->match('type')->options(self::MSG_TYPES)->mapClassGroup([[0, 'danger'], [1, 'success'], [2, 'warning']]);

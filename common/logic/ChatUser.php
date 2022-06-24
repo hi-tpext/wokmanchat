@@ -267,7 +267,21 @@ class ChatUser
         $str = preg_replace_callback(    //执行一个正则表达式搜索并且使用一个回调进行替换
             '/./u',
             function (array $match) {
-                return strlen($match[0]) >= 4 ? '?' : $match[0];
+                return strlen($match[0]) >= 4 ? '/e:' . base64_encode($match[0]) .'e/' : $match[0];
+            },
+            $str
+        );
+
+        return $str;
+    }
+
+    // 过滤还原emoji表情
+    protected function recoverEmoji($str)
+    {
+        $str = preg_replace_callback(    //执行一个正则表达式搜索并且使用一个回调进行替换
+            '/\/e:(.+?)e\//is',
+            function (array $match) {
+                return base64_decode($match[1]);
             },
             $str
         );
@@ -637,6 +651,7 @@ class ChatUser
             $ses['time'] = strstr($ses['update_time'], $today) ? date('H:i', strtotime($ses['update_time'])) : date('m-d H:i', strtotime($ses['update_time']));
 
             if ($ses['last_msg']) {
+                $ses['last_msg']['content'] = $this->recoverEmoji($ses['last_msg']['content']);
                 $ses['last_msg']['time'] = strstr($ses['last_msg']['create_time'], $today) ? date('H:i', strtotime($ses['last_msg']['create_time'])) : date('m-d H:i', strtotime($ses['last_msg']['create_time']));
             }
 
@@ -798,6 +813,7 @@ class ChatUser
         $today = date('Y-m-d');
 
         foreach ($messages as &$msg) {
+            $msg['content'] = $this->recoverEmoji($msg['content']);
             $msg['time'] = strstr($msg['create_time'], $today) ? date('H:i', strtotime($msg['create_time'])) : date('m-d H:i', strtotime($msg['create_time']));
             if ($msg['type'] == 4) {
                 $msg['content'] = json_decode($msg['content'], true); //自定义内容，转换为json

@@ -28,6 +28,21 @@ return [
 ];
 ```
 
+#### webman修改配置
+
+`/config/process.php`
+
+```php
+ return [
+    //....其它配置，这里省略....
+    'wokmanchat'  => [
+        'handler'  => 'wokmanchat\\websocket\\Webman',
+        'listen'  => 'websocket://0.0.0.0:22886',
+    ],
+];
+//修改完重启webman
+```
+
 #### 环境要求
 
 需要使用以下php方法，确保以下方法未被禁用：
@@ -41,7 +56,7 @@ pcntl_alarm
 其他（待补充）
 ```
 
-#### 启动脚本,start.sh
+#### tp 启动脚本,start.sh
 
 ```bash
 COUNT1=`ps -ef |grep WorkerMan|grep -v "grep" |wc -l`;
@@ -57,7 +72,7 @@ if [ $COUNT1 -eq 0 ];then
 fi
 ```
 
-#### 重启脚本,restart.sh
+#### tp 重启脚本,restart.sh
 
 ```bash
 cd /www/wwwroot/www.localhost.com

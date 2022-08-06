@@ -39,7 +39,7 @@ class Wokchatuser extends Controller
 
         $this->indexWith = ['roomOwner', 'app'];
 
-        Lang::load(Module::getInstance()->getRoot() . implode(DIRECTORY_SEPARATOR, ['admin', 'lang', config('default_lang'), 'wokchatuser' . '.php']));
+        Lang::load(Module::getInstance()->getRoot() . implode(DIRECTORY_SEPARATOR, ['admin', 'lang', config('default_lang', 'zh-cn'), 'wokchatuser' . '.php']));
     }
 
     /**

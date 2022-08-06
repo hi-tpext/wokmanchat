@@ -79,7 +79,7 @@ class Module  extends baseModule
      */
     public function install()
     {
-        if (!class_exists('\\think\\worker\\Server')) { //根据think-worker中某一个类是否存在来判断sdk是否已经安装
+        if (!ExtLoader::isWebman() && !class_exists('\\think\\worker\\Server')) { //根据think-worker中某一个类是否存在来判断sdk是否已经安装
 
             if (ExtLoader::isTP51()) {
 

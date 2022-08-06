@@ -4,30 +4,17 @@ namespace wokmanchat\websocket;
 
 use think\facade\Db;
 use think\Validate;
+use Webman\Config;
 use think\facade\Log;
-use Workerman\Worker;
-use think\facade\Config;
-use think\worker\Server;
 use Workerman\Lib\Timer;
-use tpext\common\ExtLoader;
 use wokmanchat\common\logic;
 use wokmanchat\common\model;
 use wokmanchat\common\Module;
 use think\exception\ValidateException;
 use Workerman\Connection\TcpConnection;
 
-class Index extends Server
+class Webman
 {
-    protected $socket = 'websocket://0.0.0.0:22886';
-
-    protected $option   = [
-        'name' => 'workmanchat',
-        'count' => 1,
-        'user' => 'www',
-        'group' => 'www',
-        'reloadable' => true,
-        'reusePort' => true,
-    ];
 
     public const HEARTBEAT_TIME = 60;
 
@@ -46,24 +33,6 @@ class Index extends Server
      * @var logic\ChatUser
      */
     protected $userLogic;
-
-    public function __construct()
-    {
-        $config = Module::getInstance()->getConfig();
-        $this->socket = 'websocket://0.0.0.0:' . ($config['port'] ?: 22886);
-
-        $this->option['user'] = $config['user'] ?: 'www';
-        $this->option['group'] = $config['group'] ?: 'www';
-
-        Worker::$daemonize = $config['daemonize'] == 1;
-        Worker::$pidFile = app()->getRuntimePath() . 'worker' . $config['port'] . '.pid';
-        Worker::$logFile = app()->getRuntimePath() . 'worker' . $config['port'] . '.log';
-        Worker::$stdoutFile = app()->getRuntimePath() . 'worker' . $config['port'] . '.stdout.log';
-
-        Log::init(['type' => 'File', 'path' => app()->getRuntimePath() . 'log' . DIRECTORY_SEPARATOR . 'worker']);
-
-        parent::__construct();
-    }
 
     /**
      * Undocumented function
@@ -637,51 +606,9 @@ class Index extends Server
 
     protected function initDb()
     {
-        if (ExtLoader::isTP51()) {
-            $breakMatchStr = [
-                'server has gone away',
-                'no connection to the server',
-                'Lost connection',
-                'is dead or not enabled',
-                'Error while sending',
-                'decryption failed or bad record mac',
-                'server closed the connection unexpectedly',
-                'SSL connection has been closed unexpectedly',
-                'Error writing data to the connection',
-                'Resource deadlock avoided',
-                'failed with errno',
-                'child connection forced to terminate due to client_idle_limit',
-                'query_wait_timeout',
-                'reset by peer',
-                'Physical connection is not usable',
-                'TCP Provider: Error code 0x68',
-                'ORA-03114',
-                'Packets out of order. Expected',
-                'Adaptive Server connection failed',
-                'Communication link failure',
-                'connection is no longer usable',
-                'Login timeout expired',
-                'SQLSTATE[HY000] [2002] Connection refused',
-                'running with the --read-only option so it cannot execute this statement',
-                'The connection is broken and recovery is not possible. The connection is marked by the client driver as unrecoverable. No attempt was made to restore the connection.',
-                'SQLSTATE[HY000] [2002] php_network_getaddresses: getaddrinfo failed: Try again',
-                'SQLSTATE[HY000] [2002] php_network_getaddresses: getaddrinfo failed: Name or service not known',
-                'SQLSTATE[HY000]: General error: 7 SSL SYSCALL error: EOF detected',
-                'SQLSTATE[HY000] [2002] Connection timed out',
-                'SSL: Connection timed out',
-                'SQLSTATE[HY000]: General error: 1105 The last transaction was aborted due to Seamless Scaling. Please retry.',
-                'bytes failed with errno=32 Broken pipe'
-            ];
+        $config = array_merge(Config::get('thinkorm.connections.mysql'), ['break_reconnect' => true]);
 
-            $config = array_merge(Config::pull('database'), ['break_reconnect' => true, 'break_match_str' => $breakMatchStr]);
-
-            \think\Db::init($config);
-            \think\Db::connect($config);
-        } else if (ExtLoader::isTP60()) {
-            $config = array_merge(Config::get('database.connections.mysql'), ['break_reconnect' => true]);
-
-            Db::setConfig($config);
-            Db::connect('mysql')->connect($config);
-        }
+        Db::setConfig($config);
+        Db::connect('mysql')->connect($config);
     }
 }

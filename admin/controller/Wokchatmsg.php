@@ -46,7 +46,7 @@ class Wokchatmsg extends Controller
 
         $this->indexWith = ['fromUser', 'toUser', 'app'];
 
-        Lang::load(Module::getInstance()->getRoot() . implode(DIRECTORY_SEPARATOR, ['admin', 'lang', config('default_lang'), 'wokchatmsg' . '.php']));
+        Lang::load(Module::getInstance()->getRoot() . implode(DIRECTORY_SEPARATOR, ['admin', 'lang', config('default_lang', 'zh-cn'), 'wokchatmsg' . '.php']));
     }
 
     /**

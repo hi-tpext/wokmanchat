@@ -267,7 +267,7 @@ class ChatUser
         $str = preg_replace_callback(    //执行一个正则表达式搜索并且使用一个回调进行替换
             '/./u',
             function (array $match) {
-                return strlen($match[0]) >= 4 ? '/e:' . base64_encode($match[0]) .'e/' : $match[0];
+                return strlen($match[0]) >= 4 ? '/e:' . base64_encode($match[0]) . 'e/' : $match[0];
             },
             $str
         );
@@ -634,9 +634,22 @@ class ChatUser
         $app_id = $this->app_id;
         $sys_uid = $this->sys_uid;
 
+        $userFields = ['id', 'nickname', 'remark', 'avatar', 'uid', 'room_owner_uid'];
+        $msgFields = ['id', 'content', 'type', 'from_uid', 'to_uid', 'create_time'];
+        $sessionFields = ['id', 'last_msg_id', 'sys_uid1', 'sys_uid2', 'is_room', 'last_read_id1', 'last_read_id2', 'update_time'];
+
         $sessions = model\WokChatSession::whereRaw('app_id = :app_id and (sys_uid1 = :sys_uid1 or sys_uid2 = :sys_uid2) and last_msg_id > 0', ['app_id' => $app_id, 'sys_uid1' => $sys_uid, 'sys_uid2' => $sys_uid])
             ->order('last_msg_id desc,rank desc')
-            ->with(['lastMsg'])
+            ->with([
+                'lastMsg' => function ($query) use ($msgFields) {
+                    $query->field($msgFields);
+                }, 'sysUser1' => function ($query) use ($userFields) {
+                    $query->field($userFields);
+                }, 'sysUser2' => function ($query) use ($userFields) {
+                    $query->field($userFields);
+                }
+            ])
+            ->field($sessionFields)
             ->limit($skip, $pagesize)
             ->select();
 
@@ -656,9 +669,9 @@ class ChatUser
             }
 
             if ($ses['sys_uid1'] == $self['id']) {
-                $ses['that'] = $this->getUserBySysId($ses['sys_uid2']);
+                $ses['that'] = $ses['sys_user2'];
             } else {
-                $ses['that'] = $this->getUserBySysId($ses['sys_uid1']);
+                $ses['that'] = $ses['sys_user1'];
             }
 
             if ($kwd) {
@@ -666,7 +679,6 @@ class ChatUser
                     continue;
                 }
             }
-            //
 
             $where = [];
             $where[] = ['app_id', '=', $this->app_id];
@@ -692,9 +704,7 @@ class ChatUser
 
             $ses['new_msg_count'] = model\WokChatMsg::where($where)->count();
 
-            if ($ses['lastMsg']) {
-                unset($ses['lastMsg']['app_id'], $ses['lastMsg']['create_time'], $ses['lastMsg']['update_time']);
-            }
+            unset($ses['last_msg_id'], $ses['sys_user2'], $ses['sys_user1'], $ses['sys_uid1'], $ses['sys_uid2'], $ses['last_read_id1'], $ses['last_read_id2']);
 
             $list[] = $ses;
         }
@@ -806,7 +816,17 @@ class ChatUser
             }
         }
 
-        $messages = model\WokChatMsg::where($where)->with(['fromUser'])->order($orderBy)->limit(0, $pagesize)->select();
+        $userFields = ['id', 'nickname', 'remark', 'avatar', 'uid', 'room_owner_uid'];
+        $msgFields = ['id', 'content', 'type', 'sys_from_uid', 'from_uid', 'to_uid', 'create_time'];
+
+        $messages = model\WokChatMsg::where($where)
+            ->order($orderBy)
+            ->with(['fromUser' => function ($query) use ($userFields) {
+                $query->field($userFields);
+            }])
+            ->field($msgFields)
+            ->limit(0, $pagesize)
+            ->select();
 
         $ids = [];
 
@@ -819,10 +839,6 @@ class ChatUser
                 $msg['content'] = json_decode($msg['content'], true); //自定义内容，转换为json
             }
             $ids[] = $msg['id'];
-
-            if ($msg['fromUser']) {
-                unset($msg['fromUser']['app_id'], $msg['fromUser']['login_time'], $msg['fromUser']['create_time'], $msg['fromUser']['update_time']);
-            }
         }
 
         if (count($ids)) {
@@ -932,8 +948,10 @@ class ChatUser
             return null;
         }
 
+        $userFields = ['id', 'nickname', 'remark', 'avatar', 'uid', 'room_owner_uid'];
+
         return model\WokChatUser::where(['app_id' => $this->app_id, 'uid' => $uid])
-            ->field('id,nickname,remark,avatar,uid,room_owner_uid')
+            ->field($userFields)
             ->find();
     }
 
@@ -951,8 +969,10 @@ class ChatUser
             return null;
         }
 
+        $userFields = ['id', 'nickname', 'remark', 'avatar', 'uid', 'room_owner_uid'];
+
         return model\WokChatUser::where(['app_id' => $this->app_id, 'id' => $sys_uid])
-            ->field('id,nickname,remark,avatar,uid,room_owner_uid')
+            ->field($userFields)
             ->find();
     }
 

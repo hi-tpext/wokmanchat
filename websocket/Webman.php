@@ -434,10 +434,6 @@ class Webman
      */
     protected function heartBeat($worker)
     {
-        Timer::add(5, function () {
-            model\WokChatUser::where('id', 1)->find(); //保存数据库连接
-        });
-
         Timer::add(10, function () use ($worker) {
 
             $timeNow = time();
@@ -606,9 +602,6 @@ class Webman
 
     protected function initDb()
     {
-        $config = array_merge(Config::get('thinkorm.connections.mysql'), ['break_reconnect' => true]);
-
-        Db::setConfig($config);
-        Db::connect('mysql')->connect($config);
+        //无需处理数据库
     }
 }

@@ -403,7 +403,7 @@ class ChatUser
             $this->switchUser($self);
         }
 
-        if ($res1 &&  $res2['code'] == 1 && intval($res3['code']) == 1) {
+        if ($res1 &&  $res2['code'] == 1 && $res3['code'] == 1) {
             Db::commit();
 
             return $res2;

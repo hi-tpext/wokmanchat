@@ -7,6 +7,9 @@ use wokmanchat\common\logic\ChatApp;
 use wokmanchat\common\logic\ChatUser;
 use wokmanchat\common\model;
 
+/**
+ * 管理接口
+ */
 class Wokchatadmin extends Controller
 {
     /**
@@ -60,6 +63,11 @@ class Wokchatadmin extends Controller
         return $res;
     }
 
+    /**
+     * 同步用户信息
+     * 把外部系统用户推送到聊天系统
+     * @return mixed
+     */
     public function pushUser()
     {
         $data = request()->post();
@@ -75,7 +83,7 @@ class Wokchatadmin extends Controller
             'nickname|用户昵称' => 'require',
             //'remark|用户备注' => 'require',
             //'avatar|用户头像' => 'require',
-            'token|用户token' => 'require'
+            //'token|用户token' => 'require'
         ]);
 
         if ($result !== true) {
@@ -98,6 +106,63 @@ class Wokchatadmin extends Controller
         return json($res);
     }
 
+    /**
+     * 创建消息
+     * [脱离聊天界面]直接在聊天系统中添加一条消息
+     *
+     * @return mixed
+     */
+    public function createMsg()
+    {
+        $data = request()->post();
+
+        $valdate = $this->validateApp($data);
+        if ($valdate['code'] != 1) {
+            return json($valdate);
+        }
+
+        $result = $this->validate($data, [
+            'uid|发送用户uid' => 'require|number',
+            'to_uid|接收用户uid' => 'require|number',
+            'content|发送内容' => 'require|number',
+            'type|消息类型' => 'require|number|gt:0',
+        ]);
+
+        if ($result !== true) {
+            return json([
+                'code' => 0,
+                'msg' => $result
+            ]);
+        }
+
+        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->find();
+
+        if (!$user) {
+            return json([
+                'code' => 0,
+                'msg' => '用户不存在:' . $data['uid']
+            ]);
+        }
+
+        $this->userLogic->switchUser($user);
+
+        //获取会话
+        $res = $this->userLogic->connectToUser($data['to_uid']);
+
+        if ($res['code'] != 1) {
+            return json($res);
+        }
+
+        $res =  $this->userLogic->sendBySession($res['session']['id'], $data['content'], $data['type']);
+
+        return json($res);
+    }
+
+    /**
+     * 修改用户信息
+     *
+     * @return mixed
+     */
     public function editUser()
     {
         $data = request()->post();

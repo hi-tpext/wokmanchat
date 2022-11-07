@@ -128,7 +128,7 @@ class ChatApp
      * @param string $token
      * @return array
      */
-    public function pushUser($uid, $nickname, $remark, $avatar, $token)
+    public function pushUser($uid, $nickname, $remark, $avatar, $token = '')
     {
         $valdate = $this->isValidateApp();
 
@@ -145,18 +145,34 @@ class ChatApp
         }
 
         if ($exist = model\WokChatUser::where(['app_id' => $this->app_id, 'uid' => $uid])->find()) {
+
+            //未传递token，
+            if (empty($token)) {
+                if ($exist['token']) {
+                    $token = $exist['token'];
+                } else //生成一个
+                {
+                    $token = md5($this->app_id . $this->app['secret'] . $uid . time());
+                }
+            }
+
             $res = $exist->save([
-                'nickname' => $nickname,
-                'remark' => $remark,
+                'nickname' => $this->filterEmoji($nickname),
+                'remark' => $this->filterEmoji($remark),
                 'avatar' => $avatar,
                 'token' => $token,
             ]);
 
             if ($res) {
-                return ['code' => 1, 'msg' => '成功'];
+                return ['code' => 1, 'msg' => '成功', 'data' => ['token' => $token]];
             }
 
-            return ['code' => 0, 'msg' => '保存失败'];
+            return ['code' => 0, 'msg' => '保存失败',  'data' => ''];
+        }
+
+        //未传递token，生成一个
+        if (empty($token)) {
+            $token = md5($this->app_id . $this->app['secret'] . $uid . time());
         }
 
         $user = new model\WokChatUser;
@@ -174,10 +190,10 @@ class ChatApp
         $res = $user->save($data);
 
         if ($res) {
-            return ['code' => 1, 'msg' => '成功'];
+            return ['code' => 1, 'msg' => '成功', 'data' => ['token' => $token]];
         }
 
-        return ['code' => 0, 'msg' => '添加失败'];
+        return ['code' => 0, 'msg' => '添加失败', 'data' => ''];
     }
 
     /**

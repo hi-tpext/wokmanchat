@@ -5,6 +5,10 @@ namespace wokmanchat\api\controller;
 use think\Controller;
 use wokmanchat\common\logic\ChatUser;
 
+/**
+ * 用户接口，大部分接口和websocket的一样
+ * 可以在不使用websocket的情况下完成聊天功能
+ */
 class Wokchatuser extends Controller
 {
     /**

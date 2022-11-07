@@ -47,6 +47,8 @@ class Index extends Server
      */
     protected $userLogic;
 
+    protected $innerTextWorker = null;
+
     public function __construct()
     {
         $config = Module::getInstance()->getConfig();
@@ -103,6 +105,8 @@ class Index extends Server
         $this->userLogic = new logic\ChatUser;
 
         $this->heartBeat($worker);
+
+        $this->innerWoker();
     }
 
     /**
@@ -633,6 +637,34 @@ class Index extends Server
         }
 
         return true;
+    }
+
+    // 开启一个内部端口，方便内部系统推送数据，Text协议格式 文本+换行符
+    protected function innerWoker()
+    {
+        $that = $this;
+
+        $this->innerTextWorker = new Worker('Text://127.0.0.1:11220');
+
+        $this->innerTextWorker->onMessage = function ($connection,  $data = '{}') use ($that) {
+            $data = json_decode($data, true);
+            if (!empty($data) && isset($data['action'])) {
+                if ($data['action'] == 'new_message_notify') { //通过管理员接口添加消息后，刷新聊天界面
+                    $session = $data['session'];
+                    $from_uid = $data['from_uid'] ?? 0;
+                    if ($session) {
+                        $that->sendMessageByUid($session['app_id'], $session['uid1'], ['do_action' => 'new_message', 'session' => $session, 'from_uid' => $from_uid]);
+                        $that->sendMessageByUid($session['app_id'], $session['uid2'], ['do_action' => 'new_message', 'session' => $session, 'from_uid' => $from_uid]);
+
+                        $connection->send('new_message_notify ok');
+                        return;
+                    }
+                }
+            }
+            $connection->send('failed');
+        };
+
+        $this->innerTextWorker->listen();
     }
 
     protected function initDb()

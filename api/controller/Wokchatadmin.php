@@ -124,7 +124,7 @@ class Wokchatadmin extends Controller
         $result = $this->validate($data, [
             'uid|发送用户uid' => 'require|number',
             'to_uid|接收用户uid' => 'require|number',
-            'content|发送内容' => 'require|number',
+            'content|发送内容' => 'require',
             'type|消息类型' => 'require|number|gt:0',
         ]);
 
@@ -154,6 +154,17 @@ class Wokchatadmin extends Controller
         }
 
         $res =  $this->userLogic->sendBySession($res['session']['id'], $data['content'], $data['type']);
+
+        if ($res['code'] == 1) {
+            $client = stream_socket_client('tcp://127.0.0.1:11220', $errno, $errstr, 1);
+            $data = ['action' => 'new_message_notify', 'session' => $res['session'], 'from_uid' => $data['uid']];
+
+            fwrite($client, json_encode($data) . "\n");
+            // 读取推送结果
+            $result =  fread($client, 8192) ?: 'failed';
+
+            $res['push_result'] = $result;
+        }
 
         return json($res);
     }

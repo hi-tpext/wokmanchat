@@ -108,7 +108,7 @@ class Wokchatuser extends Controller
 
         $result = $this->validate($data, [
             'session_id|会话id' => 'require|number',
-            'content|发送内容' => 'require|number',
+            'content|发送内容' => 'require',
             'type|消息类型' => 'require|number|gt:0'
         ]);
 

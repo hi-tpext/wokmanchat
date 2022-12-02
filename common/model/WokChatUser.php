@@ -10,6 +10,11 @@ class WokChatUser extends Model
 
     protected $autoWriteTimestamp = 'datetime';
 
+    //tp6模型关联字段驼峰转下划线
+    protected $mapping = [
+        'roomOwner' => 'room_owner'
+    ];
+
     public function app()
     {
         return $this->belongsTo(WokChatApp::class, 'app_id', 'id');

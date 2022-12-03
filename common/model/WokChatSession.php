@@ -14,7 +14,7 @@ class WokChatSession extends Model
     protected $mapping = [
         'lastMsg' => 'last_msg',
         'toUser' => 'to_user',
-        'sysUser1' => 'sys_user2',
+        'sysUser1' => 'sys_user1',
         'sysUser2' => 'sys_user2',
     ];
 

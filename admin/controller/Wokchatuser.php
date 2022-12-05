@@ -7,6 +7,7 @@ use think\Controller;
 use tpext\builder\traits\actions;
 use think\facade\Lang;
 use wokmanchat\common\Module;
+use tpext\think\App;
 
 /**
  * @time tpextmanager 生成于2021-08-06 17:23:30
@@ -39,7 +40,7 @@ class Wokchatuser extends Controller
 
         $this->indexWith = ['roomOwner', 'app'];
 
-        Lang::load(Module::getInstance()->getRoot() . implode(DIRECTORY_SEPARATOR, ['admin', 'lang', config('default_lang', 'zh-cn'), 'wokchatuser' . '.php']));
+        Lang::load(Module::getInstance()->getRoot() . implode(DIRECTORY_SEPARATOR, ['admin', 'lang', App::getDefaultLang(), 'wokchatuser' . '.php']));
     }
 
     /**

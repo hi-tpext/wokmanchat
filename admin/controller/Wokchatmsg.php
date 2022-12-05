@@ -8,6 +8,7 @@ use wokmanchat\common\Module;
 use tpext\builder\traits\actions;
 use wokmanchat\common\model\WokChatSession;
 use wokmanchat\common\model\WokChatMsg as WokChatMsgModel;
+use tpext\think\App;
 
 /**
  * @time tpextmanager 生成于2021-08-06 17:26:10
@@ -46,7 +47,7 @@ class Wokchatmsg extends Controller
 
         $this->indexWith = ['fromUser', 'toUser', 'app'];
 
-        Lang::load(Module::getInstance()->getRoot() . implode(DIRECTORY_SEPARATOR, ['admin', 'lang', config('default_lang', 'zh-cn'), 'wokchatmsg' . '.php']));
+        Lang::load(Module::getInstance()->getRoot() . implode(DIRECTORY_SEPARATOR, ['admin', 'lang', App::getDefaultLang(), 'wokchatmsg' . '.php']));
     }
 
     /**

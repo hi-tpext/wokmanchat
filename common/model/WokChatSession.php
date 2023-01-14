@@ -13,7 +13,6 @@ class WokChatSession extends Model
     //tp6模型关联字段驼峰转下划线
     protected $mapping = [
         'lastMsg' => 'last_msg',
-        'toUser' => 'to_user',
         'sysUser1' => 'sys_user1',
         'sysUser2' => 'sys_user2',
     ];

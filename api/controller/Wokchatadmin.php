@@ -84,6 +84,8 @@ class Wokchatadmin extends Controller
             //'remark|用户备注' => 'require',
             //'avatar|用户头像' => 'require',
             //'token|用户token' => 'require'
+            //'auto_reply|自动回复' => 'require'
+            //'auto_reply_offline|自动回复[离线]' => 'require'
         ]);
 
         if ($result !== true) {
@@ -91,6 +93,10 @@ class Wokchatadmin extends Controller
                 'code' => 0,
                 'msg' => $result
             ]);
+        }
+
+        if (!isset($data['token'])) {
+            $data['token'] = '';
         }
 
         if (!isset($data['remark'])) {
@@ -101,7 +107,15 @@ class Wokchatadmin extends Controller
             $data['avatar'] = '';
         }
 
-        $res = $this->appLogic->pushUser($data['uid'], $data['nickname'], $data['remark'], $data['avatar'], $data['token']);
+        if (!isset($data['auto_reply'])) {
+            $data['auto_reply'] = '';
+        }
+
+        if (!isset($data['auto_reply_offline'])) {
+            $data['auto_reply_offline'] = '';
+        }
+
+        $res = $this->appLogic->pushUser($data['uid'], $data['nickname'], $data['remark'], $data['avatar'], $data['token'], $data['auto_reply'], $data['auto_reply_offline']);
 
         return json($res);
     }
@@ -135,7 +149,7 @@ class Wokchatadmin extends Controller
             ]);
         }
 
-        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->find();
+        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->cache(600)->find();
 
         if (!$user) {
             return json([
@@ -161,148 +175,10 @@ class Wokchatadmin extends Controller
 
             fwrite($client, json_encode($data) . "\n");
             // 读取推送结果
-            $result =  fread($client, 8192) ?: 'failed';
+            $result = fread($client, 8192) ?: 'failed';
 
             $res['push_result'] = $result;
         }
-
-        return json($res);
-    }
-
-    /**
-     * 修改用户信息
-     *
-     * @return mixed
-     */
-    public function editUser()
-    {
-        $data = request()->post();
-
-        $valdate = $this->validateApp($data);
-        if ($valdate['code'] != 1) {
-            return json($valdate);
-        }
-
-        $result = $this->validate($data, [
-            'uid|用户uid' => 'require'
-        ]);
-
-        if ($result !== true) {
-            return json([
-                'code' => 0,
-                'msg' => $result
-            ]);
-        }
-
-        $res = $this->appLogic->editUser($data['uid'], $data);
-
-        return json($res);
-    }
-
-    public function editUserToken()
-    {
-        $data = request()->post();
-
-        $valdate = $this->validateApp($data);
-
-        if ($valdate['code'] != 1) {
-            return json($valdate);
-        }
-
-        $result = $this->validate($data, [
-            'uid|用户uid' => 'require',
-            'token|用户token' => 'require',
-        ]);
-
-        if ($result !== true) {
-            return json([
-                'code' => 0,
-                'msg' => $result
-            ]);
-        }
-
-        $res = $this->appLogic->editUserToken($data['uid'], $data['token']);
-
-        return json($res);
-    }
-
-    public function editUserNickname()
-    {
-        $data = request()->post();
-
-        $valdate = $this->validateApp($data);
-
-        if ($valdate['code'] != 1) {
-            return json($valdate);
-        }
-
-        $result = $this->validate($data, [
-            'uid|用户uid' => 'require',
-            'nickname|用户昵称' => 'require',
-        ]);
-
-        if ($result !== true) {
-            return json([
-                'code' => 0,
-                'msg' => $result
-            ]);
-        }
-
-        $res = $this->appLogic->editUserNickname($data['uid'], $data['nickname']);
-
-        return json($res);
-    }
-
-    public function editUserRemark()
-    {
-        $data = request()->post();
-
-        $valdate = $this->validateApp($data);
-
-        if ($valdate['code'] != 1) {
-            return json($valdate);
-        }
-
-        $result = $this->validate($data, [
-            'uid|用户uid' => 'require',
-            'remark|用户备注' => 'require',
-        ]);
-
-        if ($result !== true) {
-            return json([
-                'code' => 0,
-                'msg' => $result
-            ]);
-        }
-
-        $res = $this->appLogic->editUserRemark($data['uid'], $data['remark']);
-
-        return json($res);
-    }
-
-    public function editUserAvatar()
-    {
-        $data = request()->post();
-
-        $valdate = $this->validateApp($data);
-
-        if ($valdate['code'] != 1) {
-            return json($valdate);
-        }
-
-        $result = $this->validate($data, [
-            'uid|用户uid' => 'require',
-            'avatar|用户头像' => 'require',
-        ]);
-
-        if ($result !== true) {
-            return json([
-                'code' => 0,
-                'msg' => $result
-            ]);
-        }
-
-        $res = $this->appLogic->editUserAvatar($data['uid'], $data['avatar']);
 
         return json($res);
     }
@@ -333,8 +209,11 @@ class Wokchatadmin extends Controller
         if (!isset($data['kwd'])) {
             $data['kwd'] = '';
         }
+        if (!isset($data['pagesize'])) {
+            $data['pagesize'] = 10;
+        }
 
-        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->find();
+        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->cache(600)->find();
 
         if (!$user) {
             return json([
@@ -345,7 +224,7 @@ class Wokchatadmin extends Controller
 
         $this->userLogic->switchUser($user);
 
-        $res = $this->userLogic->getSessionList($data['skip'], $data['kwd']);
+        $res = $this->userLogic->getSessionList($data['skip'], $data['pagesize'], $data['kwd']);
 
         return json($res);
     }
@@ -381,7 +260,7 @@ class Wokchatadmin extends Controller
             $data['pagesize'] = 10;
         }
 
-        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->find();
+        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->cache(600)->find();
 
         if (!$user) {
             return json([
@@ -428,7 +307,7 @@ class Wokchatadmin extends Controller
             $data['pagesize'] = 10;
         }
 
-        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->find();
+        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->cache(600)->find();
 
         if (!$user) {
             return json([
@@ -464,7 +343,7 @@ class Wokchatadmin extends Controller
             ]);
         }
 
-        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->find();
+        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->cache(600)->find();
 
         if (!$user) {
             return json([

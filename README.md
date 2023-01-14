@@ -47,7 +47,7 @@ return [
 
 需要使用以下php方法，确保以下方法未被禁用：
 
-```
+```bash
 pcntl_wait
 pcntl_signal
 pcntl_fork
@@ -92,9 +92,11 @@ php think worker:server restart
 
 如果输出类似以下，说明启动成功。
 
-```
+```bash
 root      132200  0.0  0.1 217728 13776 ?        S    11:43   0:00 WorkerMan: master process  start_file=/www/wwwroot/www.localhost.com/think
 www       133280  0.0  0.2 218316 22000 ?        S    11:55   0:00 WorkerMan: worker process  workmanchat websocket://0.0.0.0:22886
 ```
 
 如果只有第一条[master process]没有[worker process]，则是启动失败，请到网站的`runimeme`目录里面查看`worker22886.stdout.log`日志分析原因。
+
+使用文档和api文档见 [doc.md](doc)

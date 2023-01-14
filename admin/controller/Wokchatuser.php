@@ -100,6 +100,8 @@ class Wokchatuser extends Controller
         $table->show('remark');
         $table->show('uid');
         $table->show('room_owner_uid')->to('{roomOwner.nickname}');
+        $table->show('auto_reply')->cut(30);
+        $table->show('auto_reply_offline')->cut(30);
 
         $table->show('login_time');
         $table->show('create_time');
@@ -134,7 +136,9 @@ class Wokchatuser extends Controller
         $form->select('app_id')->dataUrl(url('/admin/wokchatapp/selectpage'))->required();
         $form->text('nickname')->maxlength(55)->required();
         $form->image('avatar')->required();
-        $form->text('remark')->maxlength(55)->required();
+        $form->textarea('remark')->maxlength(55)->required();
+        $form->textarea('auto_reply')->maxlength(255)->help('用户在线时，其他人连接时自动回复');
+        $form->textarea('auto_reply_offline')->maxlength(255)->help('用户离线时，其他人连接时自动回复');
 
         if ($isEdit) {
             $form->show('room_owner_uid')->to('{roomOwner.nickname}');

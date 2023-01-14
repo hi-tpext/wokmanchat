@@ -14,6 +14,8 @@ return [
     'token'  => 'token',
     'uid'  => '会员外部id',
     'room_owner_uid' => '房间创建人',
+    'auto_reply' => '自动回复',
+    'auto_reply_offline' => '自动回复[离线]',
     'login_time' => '登录时间',
     'create_time'  => '添加时间',
     'create_time_start'  => '添加时间起',
@@ -21,5 +23,4 @@ return [
     'update_time'  => '更新时间',
     'update_time_start'  => '更新时间起',
     'update_time_end'  => '更新时间止',
-    'is_room'  => '是否为房间',
 ];

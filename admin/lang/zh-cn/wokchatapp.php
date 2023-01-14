@@ -10,6 +10,7 @@ return [
     'enable' => '启用',
     'name'  => '名称',
     'secret'  => '应用Secret_key',
+    'push_url' => '事件推送url',
     'create_time'  => '添加时间',
     'create_time_start'  => '添加时间起',
     'create_time_end'  => '添加时间止',

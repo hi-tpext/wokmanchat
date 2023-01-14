@@ -51,7 +51,7 @@ class ChatApp
             return ['code' => 0, 'msg' => 'sign超时请检查设备时间'];
         }
 
-        $app = model\WokChatApp::where('id', $app_id)->find();
+        $app = model\WokChatApp::where('id', $app_id)->cache(600)->find();
 
         if (!$app) {
             return ['code' => 0, 'msg' => 'app_id:应用未找到'];
@@ -92,7 +92,7 @@ class ChatApp
     }
 
     /**
-     * 免验证，切换到用户
+     * 免验证，切换到app
      *
      * @param array $app
      * @return void
@@ -128,7 +128,7 @@ class ChatApp
      * @param string $token
      * @return array
      */
-    public function pushUser($uid, $nickname, $remark, $avatar, $token = '')
+    public function pushUser($uid, $nickname, $remark, $avatar, $token = '', $auto_reply = '', $auto_reply_offline = '')
     {
         $valdate = $this->isValidateApp();
 
@@ -144,7 +144,7 @@ class ChatApp
             $avatar = 'http://' . request()->host() . '/assets/wokmanchat/images/avatar.png';
         }
 
-        if ($exist = model\WokChatUser::where(['app_id' => $this->app_id, 'uid' => $uid])->find()) {
+        if ($exist = model\WokChatUser::where(['app_id' => $this->app_id, 'uid' => $uid])->cache(600)->find()) {
 
             //未传递token，
             if (empty($token)) {
@@ -161,6 +161,8 @@ class ChatApp
                 'remark' => $this->filterEmoji($remark),
                 'avatar' => $avatar,
                 'token' => $token,
+                'auto_reply' => $auto_reply,
+                'auto_reply_offline' => $auto_reply_offline,
             ]);
 
             if ($res) {
@@ -184,6 +186,8 @@ class ChatApp
             'remark' => $this->filterEmoji($remark),
             'avatar' => $avatar,
             'token' => $token,
+            'auto_reply' => $auto_reply,
+            'auto_reply_offline' => $auto_reply_offline,
             'room_owner_uid' => 0
         ];
 
@@ -194,81 +198,5 @@ class ChatApp
         }
 
         return ['code' => 0, 'msg' => '添加失败', 'data' => ''];
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param int $uid
-     * @param array $data
-     * @return array
-     */
-    public function editUser($uid, $data)
-    {
-        $valdate = $this->isValidateApp();
-
-        if ($valdate['code'] != 1) {
-            return $valdate;
-        }
-
-        if ($exist = model\WokChatUser::where(['uid' => $uid, 'app_id' => $this->app_id])->find()) {
-            $res = $exist->allowField(['nickname', 'remark', 'avatar', 'token'])->save($data);
-
-            if ($res) {
-                return ['code' => 1, 'msg' => '成功'];
-            }
-
-            return ['code' => 0, 'msg' => '修改失败'];
-        }
-
-        return ['code' => 0, 'msg' => '用户不存在'];
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param int $uid
-     * @param string $token
-     * @return array
-     */
-    public function editUserToken($uid, $token)
-    {
-        return $this->editUser($uid, ['token' => $token]);
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param int $uid
-     * @param string $nickname
-     * @return array
-     */
-    public function editUserNickname($uid, $nickname)
-    {
-        return $this->editUser($uid, ['nickname' => $this->filterEmoji($nickname)]);
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param int $uid
-     * @param string $remark
-     * @return array
-     */
-    public function editUserRemark($uid, $remark)
-    {
-        return $this->editUser($uid, ['remark' => $this->filterEmoji($remark)]);
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param int $uid
-     * @param string $avatar
-     * @return array
-     */
-    public function editUserAvatar($uid, $avatar)
-    {
-        return $this->editUser($uid, ['avatar' => $avatar]);
     }
 }

@@ -94,8 +94,8 @@ class Chat
      * Undocumented function
      *
      * @param TcpConnection $connection
-     * @param string $data
-     * @return array
+     * @param array $data
+     * @return array|void
      */
     protected function handler($connection, $data = [])
     {
@@ -612,6 +612,8 @@ class Chat
 
             return true;
         }
+
+        return false;
     }
 
     /**

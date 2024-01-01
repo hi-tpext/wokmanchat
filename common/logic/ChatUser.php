@@ -400,9 +400,9 @@ class ChatUser
 
         if ($res1) {
 
-            $res2 = $this->userJoinRoom($self, $room, '[' . $self['nickname'] . ']创建群聊');
+            $res2 = $this->userJoinRoom($self, $room);
 
-            $res3 = $this->userJoinRoom($that, $room, '[' . $that['nickname'] . '加入群聊');
+            $res3 = $this->userJoinRoom($that, $room);
 
             $this->switchUser($self);
         }
@@ -470,7 +470,7 @@ class ChatUser
      * Undocumented function
      * 
      * @param array $userJoin
-     * @param array $toRoom
+     * @param array|\think\Model $toRoom
      * @return array
      */
     protected function userJoinRoom($userJoin, $toRoom)
@@ -723,7 +723,7 @@ class ChatUser
      *
      * @param int $session_id
      * @param int $rank
-     * @return boolean|string
+     * @return array
      */
     public function setSessionRank($session_id, $rank)
     {

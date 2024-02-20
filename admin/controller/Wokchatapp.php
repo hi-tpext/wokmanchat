@@ -19,6 +19,7 @@ class Wokchatapp extends Controller
     use actions\HasIndex;
     use actions\HasAutopost;
     use actions\HasAdd;
+    use actions\HasEdit;
     use actions\HasView;
     use actions\HasDelete;
 
@@ -90,6 +91,7 @@ class Wokchatapp extends Controller
 
         $table->getActionbar()
             ->btnPostRowid('secret', url('secret'), '重置Secret_key', 'btn-danger', 'mdi-backup-restore')
+            ->btnEdit()
             ->btnView()
             ->btnDelete();
 

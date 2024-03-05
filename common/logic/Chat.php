@@ -375,19 +375,21 @@ class Chat
                 if ($res['code'] == 1) {
 
                     //接收方是否在线
-                    $to_user_online = isset($this->appConnections[$data['app_id']][$res['to_user']['uid']])
-                        && count($this->appConnections[$data['app_id']][$res['to_user']['uid']]) > 0;
+                    $to_user_online = isset($this->appConnections[$connection->app_id][$res['to_user']['uid']])
+                        && count($this->appConnections[$connection->app_id][$res['to_user']['uid']]) > 0;
 
                     if ($to_user_online) {
-                        if ($res['to_user']['auto_reply']) {
-                            $res['list'] += ['type' => 0, 'content' => $res['to_user']['auto_reply'], 'id' => time()]; //type:0 为系统消息
-                        }
+                        // if ($res['to_user']['auto_reply']) {
+                        //     $res['list'] += ['type' => 0, 'content' => $res['to_user']['auto_reply'], 'id' => time()]; //type:0 为系统消息
+                        // }
                     } else {
-                        if ($res['to_user']['auto_reply_offline']) {
-                            $res['list'] += ['type' => 0, 'content' => $res['to_user']['auto_reply_offline'], 'id' => time()];
-                        } else {
-                            $res['list'] += ['type' => 0, 'content' => '对方可能不在线，您可以留言给他', 'id' => time()];
-                        }
+                        $res['list'] += ['type' => 0, 'content' => '对方可能不在线，您可以留言给他', 'id' => time()];
+
+                        // if ($res['to_user']['auto_reply_offline']) {
+                        //     $res['list'] += ['type' => 0, 'content' => $res['to_user']['auto_reply_offline'], 'id' => time()];
+                        // } else {
+                        //     $res['list'] += ['type' => 0, 'content' => '对方可能不在线，您可以留言给他', 'id' => time()];
+                        // }
                     }
 
                     $connection->send(json_encode(['do_action' => 'get_history_list_success', 'list' => $res['list'], 'has_more' => $res['has_more']]));

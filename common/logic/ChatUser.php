@@ -133,7 +133,7 @@ class ChatUser
     /**
      * 免验证，切换到用户
      *
-     * @param array $user
+     * @param array|mixed $user
      * @return void
      */
     public function switchUser($user)
@@ -995,7 +995,7 @@ class ChatUser
     /**
      * Undocumented function
      * @param int $self_sys_uid
-     * @param array $session
+     * @param array|mixed $session
      * @return int|false that_sys_uid
      */
     public function getSysToUid($this_sys_uid, $session)

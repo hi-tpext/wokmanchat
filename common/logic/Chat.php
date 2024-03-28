@@ -454,7 +454,7 @@ class Chat
             return false;
         }
 
-        $user = model\WokChatUser::where(['app_id' => $app_id, 'uid' => $uid])->cache(600)->find();
+        $user = model\WokChatUser::where(['app_id' => $app_id, 'uid' => $uid])->find();
 
         if ($user) {
             $this->userLogic->switchUser($user);

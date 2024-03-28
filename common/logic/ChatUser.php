@@ -79,7 +79,7 @@ class ChatUser
             return ['code' => 0, 'msg' => 'sign超时请检查设备时间'];
         }
 
-        $app = model\WokChatApp::where('id', $app_id)->cache(600)->find();
+        $app = model\WokChatApp::where('id', $app_id)->find();
 
         if (!$app) {
             return ['code' => 0, 'msg' => 'app_id:应用未找到'];
@@ -91,7 +91,7 @@ class ChatUser
 
         $this->app_id = $app_id;
 
-        $user = model\WokChatUser::where(['app_id' => $this->app_id, 'uid' => $uid])->cache(600)->find();
+        $user = model\WokChatUser::where(['app_id' => $this->app_id, 'uid' => $uid])->find();
 
         if (!$user) {
             return ['code' => 0, 'msg' => 'uid:用户未找到' . $uid . '-' . $app_id];
@@ -159,7 +159,7 @@ class ChatUser
             return $valdate;
         }
 
-        if ($exist = model\WokChatUser::where(['uid' => $this->uid, 'app_id' => $this->app_id])->cache(600)->find()) {
+        if ($exist = model\WokChatUser::where(['uid' => $this->uid, 'app_id' => $this->app_id])->find()) {
             $res = $exist->allowField(['nickname', 'remark', 'avatar'])->save($data);
 
             if ($res) {
@@ -244,7 +244,7 @@ class ChatUser
      */
     public function connectToSession($session_id)
     {
-        $session = model\WokChatSession::where(['id' => $session_id, 'app_id' => $this->app_id])->cache(600)->find();
+        $session = model\WokChatSession::where(['id' => $session_id, 'app_id' => $this->app_id])->find();
 
         if (!$session) {
             return ['code' => 0, 'msg' => '会话不存在,session_id:' . $session_id . ',app_id:' . $this->app_id];
@@ -303,7 +303,7 @@ class ChatUser
      */
     public function sendBySession($session_id, $content, $type)
     {
-        $session = model\WokChatSession::where(['id' => $session_id, 'app_id' => $this->app_id])->cache(600)->find();
+        $session = model\WokChatSession::where(['id' => $session_id, 'app_id' => $this->app_id])->find();
 
         if (!$session) {
             return ['code' => 0, 'msg' => '会话不存在'];
@@ -323,9 +323,17 @@ class ChatUser
             return ['code' => 0, 'msg' => '接收用户不存在'];
         }
 
-        if (mb_strlen($content) > 2000) {
-            return ['code' => 0, 'msg' => '发送内容应在2000字以内'];
+        if ($type == 4) {
+            if (mb_strlen($content) > 2500) {
+                return ['code' => 0, 'msg' => '发送内容应在2500字以内'];
+            }
+        } else {
+            if (mb_strlen($content) > 500) {
+                return ['code' => 0, 'msg' => '发送内容应在500字以内'];
+            }
         }
+
+
 
         $to_uid = $toUser['uid'];
 
@@ -437,7 +445,7 @@ class ChatUser
             return $valdate;
         }
 
-        $session = model\WokChatSession::where(['id' => $room_session_id, 'app_id' => $this->app_id])->cache(600)->find();
+        $session = model\WokChatSession::where(['id' => $room_session_id, 'app_id' => $this->app_id])->find();
 
         if (!$session) {
             return ['code' => 0, 'msg' => '会话不存在'];
@@ -534,7 +542,7 @@ class ChatUser
      */
     public function createRoomBySession($session_id)
     {
-        $session = model\WokChatSession::where(['id' => $session_id, 'app_id' => $this->app_id])->cache(600)->find();
+        $session = model\WokChatSession::where(['id' => $session_id, 'app_id' => $this->app_id])->find();
 
         if (!$session) {
             return ['code' => 0, 'msg' => '会话不存在'];
@@ -582,7 +590,7 @@ class ChatUser
 
         sort($arr, SORT_NUMERIC);
 
-        $session = model\WokChatSession::where(['app_id' => $this->app_id, 'sys_uid1' => $arr[0], 'sys_uid2' => $arr[1]])->cache(600)->find();
+        $session = model\WokChatSession::where(['app_id' => $this->app_id, 'sys_uid1' => $arr[0], 'sys_uid2' => $arr[1]])->find();
 
         if ($session) {
             return ['code' => 1, 'msg' => '成功', 'session' => $session];
@@ -737,7 +745,7 @@ class ChatUser
             return ['code' => 0, 'msg' => 'rank为大于0的整数'];
         }
 
-        $session = model\WokChatSession::where(['id' => $session_id, 'app_id' => $this->app_id])->cache(600)->find();
+        $session = model\WokChatSession::where(['id' => $session_id, 'app_id' => $this->app_id])->find();
 
         if (!$session) {
             return ['code' => 0, 'msg' => '会话不存在'];
@@ -775,7 +783,7 @@ class ChatUser
             return ['code' => 0, 'msg' => '当前用户不能为空'];
         }
 
-        $session = model\WokChatSession::where(['id' => $session_id, 'app_id' => $this->app_id])->cache(600)->find();
+        $session = model\WokChatSession::where(['id' => $session_id, 'app_id' => $this->app_id])->find();
 
         if (!$session) {
             return ['code' => 0, 'msg' => '会话不存在'];
@@ -964,7 +972,6 @@ class ChatUser
         $userFields = array_merge(['id', 'nickname', 'remark', 'avatar', 'uid', 'room_owner_uid'], $apend_fileds);
 
         return model\WokChatUser::where(['app_id' => $this->app_id, 'uid' => $uid])
-            ->cache(600)
             ->field($userFields)
             ->find();
     }
@@ -987,7 +994,6 @@ class ChatUser
         $userFields = array_merge(['id', 'nickname', 'remark', 'avatar', 'uid', 'room_owner_uid'], $apend_fileds);
 
         return model\WokChatUser::where(['app_id' => $this->app_id, 'id' => $sys_uid])
-            ->cache(600)
             ->field($userFields)
             ->find();
     }

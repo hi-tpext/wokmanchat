@@ -149,7 +149,7 @@ class Wokchatadmin extends Controller
             ]);
         }
 
-        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->cache(600)->find();
+        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->find();
 
         if (!$user) {
             return json([
@@ -213,7 +213,7 @@ class Wokchatadmin extends Controller
             $data['pagesize'] = 10;
         }
 
-        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->cache(600)->find();
+        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->find();
 
         if (!$user) {
             return json([
@@ -260,7 +260,7 @@ class Wokchatadmin extends Controller
             $data['pagesize'] = 10;
         }
 
-        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->cache(600)->find();
+        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->find();
 
         if (!$user) {
             return json([
@@ -307,7 +307,7 @@ class Wokchatadmin extends Controller
             $data['pagesize'] = 10;
         }
 
-        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->cache(600)->find();
+        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->find();
 
         if (!$user) {
             return json([
@@ -343,7 +343,7 @@ class Wokchatadmin extends Controller
             ]);
         }
 
-        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->cache(600)->find();
+        $user = model\WokChatUser::where(['app_id' => $data['app_id'], 'uid' => $data['uid']])->find();
 
         if (!$user) {
             return json([

@@ -51,7 +51,7 @@ class ChatApp
             return ['code' => 0, 'msg' => 'sign超时请检查设备时间'];
         }
 
-        $app = model\WokChatApp::where('id', $app_id)->cache(600)->find();
+        $app = model\WokChatApp::where('id', $app_id)->find();
 
         if (!$app) {
             return ['code' => 0, 'msg' => 'app_id:应用未找到'];
@@ -144,7 +144,7 @@ class ChatApp
             $avatar = 'http://' . request()->host() . '/assets/wokmanchat/images/avatar.png';
         }
 
-        if ($exist = model\WokChatUser::where(['app_id' => $this->app_id, 'uid' => $uid])->cache(600)->find()) {
+        if ($exist = model\WokChatUser::where(['app_id' => $this->app_id, 'uid' => $uid])->find()) {
 
             //未传递token，
             if (empty($token)) {

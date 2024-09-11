@@ -152,7 +152,7 @@ class ChatApp
                     $token = $exist['token'];
                 } else //生成一个
                 {
-                    $token = md5($this->app_id . $this->app['secret'] . $uid . time());
+                    $token = md5($this->app_id . $uid . time() . mt_rand(100, 999));
                 }
             }
 
@@ -174,7 +174,7 @@ class ChatApp
 
         //未传递token，生成一个
         if (empty($token)) {
-            $token = md5($this->app_id . $this->app['secret'] . $uid . time());
+            $token = md5($this->app_id . $uid . time() . mt_rand(100, 999));
         }
 
         $user = new model\WokChatUser;

@@ -135,7 +135,7 @@ class Wokchatuser extends Controller
         $form->text('uid')->required();
         $form->select('app_id')->dataUrl(url('/admin/wokchatapp/selectpage'))->required();
         $form->text('nickname')->maxlength(55)->required();
-        $form->image('avatar')->required();
+        $form->image('avatar');
         $form->textarea('remark')->maxlength(55)->required();
         $form->textarea('auto_reply')->maxlength(255)->help('用户在线时，其他人连接时自动回复');
         $form->textarea('auto_reply_offline')->maxlength(255)->help('用户离线时，其他人连接时自动回复');
@@ -158,7 +158,6 @@ class Wokchatuser extends Controller
 
         $result = $this->validate($data, [
             'nickname|昵称' => 'require',
-            'avatar|头像' => 'require',
             'uid|用户uid' => 'require',
             'app_id|应用app_id' => 'require',
         ]);

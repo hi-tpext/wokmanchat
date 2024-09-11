@@ -36,7 +36,7 @@ class Wokchatadmin extends Controller
      * Undocumented function
      *
      * @param array|null $data
-     * @return void
+     * @return array
      */
     private function validateApp($data = null)
     {

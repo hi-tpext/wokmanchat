@@ -222,7 +222,19 @@ class ChatUser
 
         if (!$toUser) {
 
-            return ['code' => 0, 'msg' => '接收用户不存在,uid:' . $to_uid . ',app_id:' . $this->app_id];
+            $user = new model\WokChatUser;
+
+            $data = [
+                'app_id' => $this->app_id,
+                'uid' => $to_uid,
+                'nickname' => $to_uid,
+                'remark' => '',
+            ];
+
+            $res = $user->save($data);
+            if (!$res) {
+                return ['code' => 0, 'msg' => '接收用户不存在,uid:' . $to_uid . ',app_id:' . $this->app_id];
+            }
         }
 
         $sres = $this->getSession($toUser, true, $toUser['room_owner_uid'] > 0 ? 1 : 0);
@@ -655,9 +667,11 @@ class ChatUser
             ->with([
                 'lastMsg' => function ($query) use ($msgFields) {
                     $query->field($msgFields);
-                }, 'sysUser1' => function ($query) use ($userFields) {
+                },
+                'sysUser1' => function ($query) use ($userFields) {
                     $query->field($userFields);
-                }, 'sysUser2' => function ($query) use ($userFields) {
+                },
+                'sysUser2' => function ($query) use ($userFields) {
                     $query->field($userFields);
                 }
             ])
@@ -857,6 +871,8 @@ class ChatUser
             $ids[] = $msg['id'];
         }
 
+        unset($msg);
+
         if (count($ids)) {
 
             $maxId = max($ids);
@@ -876,9 +892,7 @@ class ChatUser
 
         $to_uid = $this->sys_uid == $session['sys_uid1'] ? $session['uid1'] : $session['uid2'];
 
-        $to_user = $this->getUserByUid($to_uid);
-
-        unset($msg);
+        $to_user = $this->getUserByUid($to_uid, ['auto_reply', 'auto_reply_offline']);
 
         return ['code' => 1, 'msg' => '成功', 'list' => $messages, 'has_more' => count($messages) >= $pagesize, 'to_user' => $to_user, 'session' => $session];
     }

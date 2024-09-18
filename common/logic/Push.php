@@ -19,6 +19,9 @@ class Push
      */
     public function trigger($user, $request = [], $response = [])
     {
+        if (!$user) {
+            return;
+        }
         $app = model\WokChatApp::where('id', $user['app_id'])->find();
 
         if (!$app || !$app['push_url']) {

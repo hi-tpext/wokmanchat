@@ -856,8 +856,7 @@ class ChatUser
             }])
             ->field($msgFields)
             ->limit(0, $pagesize)
-            ->select()
-            ->toArray();
+            ->select();
 
         $ids = [];
 

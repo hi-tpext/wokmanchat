@@ -385,34 +385,37 @@ class Chat
                 $res = $this->userLogic->getMessageList($data['session_id'], true, $data['from_msg_id'], $data['pagesize']);
 
                 if ($res['code'] == 1) {
+                    $connection->send(json_encode([
+                        'do_action' => 'get_history_list_success',
+                        'list' => $res['list'],
+                        'has_more' => $res['has_more'],
+                    ]));
 
                     //接收方是否在线
                     $to_user_online = isset($this->appConnections[$connection->app_id][$res['to_user']['uid']])
                         && count($this->appConnections[$connection->app_id][$res['to_user']['uid']]) > 0;
 
-                    $append = [];
-                    $list = (array)$res['list'];
-
-                    if ($to_user_online) {
-                        if ($res['self']['auto_reply']) {
-                            $append = [['type' => 0, 'content' => $res['self']['auto_reply'], 'id' => time()]]; //type:0 为系统消息
-                        }
-                    } else {
-                        if ($res['self']['auto_reply_offline']) {
-                            $append = [['type' => 0, 'content' => $res['self']['auto_reply_offline'], 'id' => time()]];
+                    if ($data['from_msg_id'] == 0) {
+                        $autoReply = '';
+                        if ($to_user_online) {
+                            if ($res['self']['auto_reply']) {
+                                $autoReply = $res['self']['auto_reply'];
+                            }
                         } else {
-                            $append = [['type' => 0, 'content' => '对方可能不在线，您可以留言给他', 'id' => time()]];
+                            if ($res['self']['auto_reply_offline']) {
+                                $autoReply = $res['self']['auto_reply_offline'];
+                            } else {
+                                $autoReply = '对方可能不在线，您可以留言给他';
+                            }
+                        }
+
+                        if ($autoReply) {
+                            $connection->send(json_encode([
+                                'do_action' => 'sys_message',
+                                'text' => $autoReply,
+                            ]));
                         }
                     }
-
-                    $list = array_merge($list, $append);
-
-                    $connection->send(json_encode([
-                        'do_action' => 'get_history_list_success',
-                        'list' => $list,
-                        'has_more' => $res['has_more'],
-                        'to_user_online' => $to_user_online
-                    ]));
                 }
 
                 return $res;

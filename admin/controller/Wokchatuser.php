@@ -35,7 +35,7 @@ class Wokchatuser extends Controller
         $this->selectTextField = '{app_id}#{uid}:{nickname}';
         $this->selectSearch = 'uid|nickname';
         $this->pk = 'id';
-        $this->pagesize = 14;
+        $this->pagesize = 10;
         $this->sortOrder = 'id desc';
 
         $this->indexWith = ['roomOwner', 'app'];

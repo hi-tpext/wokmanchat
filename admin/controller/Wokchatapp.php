@@ -36,7 +36,7 @@ class Wokchatapp extends Controller
         $this->selectTextField = '{id}#{name}';
         $this->selectSearch = 'name';
         $this->pk = 'id';
-        $this->pagesize = 8;
+        $this->pagesize = 14;
         $this->sortOrder = 'id desc';
 
         Lang::load(Module::getInstance()->getRoot() . implode(DIRECTORY_SEPARATOR, ['admin', 'lang', App::getDefaultLang(), 'wokchatapp' . '.php']));

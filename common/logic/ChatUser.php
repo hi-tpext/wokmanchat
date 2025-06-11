@@ -856,7 +856,8 @@ class ChatUser
             }])
             ->field($msgFields)
             ->limit(0, $pagesize)
-            ->select();
+            ->select()
+            ->toArray();
 
         $ids = [];
 
@@ -890,11 +891,20 @@ class ChatUser
             }
         }
 
-        $to_uid = $this->sys_uid == $session['sys_uid1'] ? $session['uid1'] : $session['uid2'];
+        $to_uid = $this->sys_uid == $session['sys_uid1'] ? $session['uid2'] : $session['uid1'];
 
         $to_user = $this->getUserByUid($to_uid, ['auto_reply', 'auto_reply_offline']);
+        $self = $this->getUserByUid($to_uid, ['auto_reply', 'auto_reply_offline']);
 
-        return ['code' => 1, 'msg' => '成功', 'list' => $messages, 'has_more' => count($messages) >= $pagesize, 'to_user' => $to_user, 'session' => $session];
+        return [
+            'code' => 1,
+            'msg' => '成功',
+            'list' => $messages,
+            'has_more' => count($messages) >= $pagesize,
+            'to_user' => $to_user,
+            'self' => $self,
+            'session' => $session
+        ];
     }
 
     public function getNewMessageCount()

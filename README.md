@@ -38,6 +38,9 @@ return [
     'wokmanchat'  => [
         'handler'  => 'wokmanchat\\websocket\\Webman',
         'listen'  => 'websocket://0.0.0.0:22886',
+        'count' => 1, // 进程数
+        'user' => 'www',
+        'group' => 'www',
     ],
 ];
 //修改完重启webman

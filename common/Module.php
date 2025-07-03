@@ -10,7 +10,7 @@ use tpext\common\ExtLoader;
  */
 class Module  extends baseModule
 {
-    protected $version = '1.0.3';
+    protected $version = '1.0.4';
 
     protected $name = 'wokman.chat';
 

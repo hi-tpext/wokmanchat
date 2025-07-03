@@ -3,11 +3,11 @@
 namespace wokmanchat\common\logic;
 
 use think\Validate;
+use think\facade\Cache;
 use think\facade\Db;
 use think\facade\Log;
 use Workerman\Worker;
 use think\facade\Config;
-use Workerman\Lib\Timer;
 use tpext\common\ExtLoader;
 use wokmanchat\common\model;
 use wokmanchat\common\Module;
@@ -497,8 +497,13 @@ class Chat
     protected function heartBeat($worker)
     {
         if (!ExtLoader::isWebman()) {
-            Timer::add(5, function () {
-                model\WokChatUser::where('id', 1)->find(); //保存数据库连接
+            Timer::add(50, function () {
+                Cache::get('ping');
+                if (ExtLoader::isTP51()) {
+                    \think\Db::query('SELECT 1'); //保存数据库连接
+                } else {
+                    Db::query('SELECT 1'); //保存数据库连接
+                }
             });
         }
 

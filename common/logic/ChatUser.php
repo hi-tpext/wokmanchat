@@ -489,7 +489,7 @@ class ChatUser
     /**
      * Undocumented function
      * 
-     * @param array $userJoin
+     * @param array|\think\Model $userJoin
      * @param array|\think\Model $toRoom
      * @return array
      */

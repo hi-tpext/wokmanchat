@@ -126,6 +126,8 @@ class ChatApp
      * @param string $remark
      * @param string $avatar
      * @param string $token
+     * @param string $auto_reply
+     * @param string $auto_reply_offline
      * @return array
      */
     public function pushUser($uid, $nickname, $remark, $avatar, $token = '', $auto_reply = '', $auto_reply_offline = '')

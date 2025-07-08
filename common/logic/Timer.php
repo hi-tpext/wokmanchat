@@ -23,4 +23,20 @@ class Timer
 
         return false;
     }
+
+    /**
+     * 删除一个定时器
+     * @param mixed $timerId
+     * @return bool
+     */
+    public static function del($timerId)
+    {
+        if (class_exists(\Workerman\Timer::class)) {
+            return \Workerman\Timer::del($timerId);
+        } else if (class_exists(\Workerman\Lib\Timer::class)) {
+            return \Workerman\Lib\Timer::del($timerId);
+        }
+
+        return false;
+    }
 }

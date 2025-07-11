@@ -152,9 +152,8 @@ class ChatApp
             if (empty($token)) {
                 if ($exist['token']) {
                     $token = $exist['token'];
-                } else //生成一个
-                {
-                    $token = md5($this->app_id . $uid . time() . mt_rand(100, 999));
+                } else { //生成一个
+                    $token = md5(__FILE__ . $this->app_id . $uid . time() . mt_rand(100, 999));
                 }
             }
 

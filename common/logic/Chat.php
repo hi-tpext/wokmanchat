@@ -13,6 +13,7 @@ use wokmanchat\common\model;
 use wokmanchat\common\Module;
 use think\exception\ValidateException;
 use Workerman\Connection\TcpConnection;
+use Workerman\Protocols\Http\Request;
 
 class Chat
 {
@@ -530,16 +531,23 @@ class Chat
      * Undocumented function
      *
      * @param TcpConnection $connection
+     * @param mixed|Request $data
      * @return void
      */
-    public function onWebSocketConnect($connection)
+    public function onWebSocketConnect($connection, $data = null)
     {
         //解决微信h5连接wss协议时报错:during WebSocket handshake: Sent non-empty 'Sec-WebSocket-Protocol' header but no response was received
-        if (isset($_SERVER['HTTP_SEC_WEBSOCKET_PROTOCOL'])) {
-            $protocols = explode(',', $_SERVER['HTTP_SEC_WEBSOCKET_PROTOCOL']);
-            $connection->headers = [
-                'Sec-WebSocket-Protocol: ' . $protocols[0],
-            ];
+
+        if (class_exists(Request::class) && $data instanceof Request && $data->header('sec-websocket-protocol')) { //workerman >= 5.0
+            $protocols = explode(',', $data->header('sec-websocket-protocol'));
+            $connection->headers = array_merge($connection->headers ?? [], ['Sec-WebSocket-Protocol: ' . $protocols[0]]);
+        } else {
+            if (isset($_SERVER['HTTP_SEC_WEBSOCKET_PROTOCOL'])) {
+                $protocols = explode(',', $_SERVER['HTTP_SEC_WEBSOCKET_PROTOCOL']);
+                $connection->headers = [
+                    'Sec-WebSocket-Protocol: ' . $protocols[0],
+                ];
+            }
         }
     }
 
@@ -680,7 +688,10 @@ class Chat
     {
         $that = $this;
 
+        $count = 2;
         $this->innerTextWorker = new Worker('Text://127.0.0.1:11220');
+        $this->innerTextWorker->count = $count;
+        $this->innerTextWorker->reusePort = true;
 
         $this->innerTextWorker->onMessage = function ($connection,  $data = '{}') use ($that) {
             $data = json_decode($data, true);
@@ -702,7 +713,7 @@ class Chat
 
         $this->innerTextWorker->listen();
 
-        echo "InnerWoker\t\tText://127.0.0.1:11220\t\t1\t\t[ok]\n";
+        echo "Wokmanchat innerWoker\t\tText://127.0.0.1:11220\t\t{$count}\t\t[ok]\n";
     }
 
     protected function initDb()

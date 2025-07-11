@@ -73,7 +73,7 @@ server
 ```php
 [
     'app_id' => 'app_id' //添加app以后生成的id
-    'sign' => '签名' // md5($secret + $time)
+    'sign' => '签名' // md5($app_secret + $time)
     'time' => '时间戳' //$time
 ]
 ```

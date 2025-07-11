@@ -102,4 +102,4 @@ www       133280  0.0  0.2 218316 22000 ?        S    11:55   0:00 WorkerMan: wo
 
 如果只有第一条[master process]没有[worker process]，则是启动失败，请到网站的`runimeme`目录里面查看`worker22886.stdout.log`日志分析原因。
 
-使用文档和api文档见 [doc.md](doc)
+使用文档和api文档见 [doc.md](doc.md)

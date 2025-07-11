@@ -117,7 +117,8 @@ class Wokchatapp extends Controller
             $this->builder()->addScript("$('#show-secret').click(function(){\$(this).next('span').toggle()});");
         } else {
             $form->text('name')->maxlength(55)->required();
-            $form->text('push_url')->maxlength(255);
+            $form->switchBtn('enable')->default(1);
+            $form->text('push_url')->maxlength(255)->help('有新消息时，推送给该地址');
         }
     }
 

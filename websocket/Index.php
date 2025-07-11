@@ -67,11 +67,12 @@ class Index extends Server
      * Undocumented function
      *
      * @param TcpConnection $connection
+     * @param mixed $data
      * @return void
      */
-    public function onWebSocketConnect($connection)
+    public function onWebSocketConnect($connection, $data = null)
     {
-        $this->chatLogic->onWebSocketConnect($connection);
+        $this->chatLogic->onWebSocketConnect($connection, $data);
     }
 
     /**

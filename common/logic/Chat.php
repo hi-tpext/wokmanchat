@@ -63,7 +63,9 @@ class Chat
 
             $res = $this->handler($connection, $data);
 
-            $this->pushLogic->trigger($this->userLogic->getSelf(), $data, $res);
+            if (isset($data['action']) && in_array($data['action'], ['send_by_session'])) {
+                $this->pushLogic->trigger($this->userLogic->getSelf(), $data, $res);
+            }
 
             $this->userLogic->reset();
 

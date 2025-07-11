@@ -730,6 +730,8 @@ class ChatUser
 
             $ses['new_msg_count'] = model\WokChatMsg::where($where)->count();
 
+            $ses = $ses->toArray();
+
             unset($ses['last_msg_id'], $ses['sys_user2'], $ses['sys_user1'], $ses['sys_uid1'], $ses['sys_uid2'], $ses['last_read_id1'], $ses['last_read_id2']);
 
             $list[] = $ses;

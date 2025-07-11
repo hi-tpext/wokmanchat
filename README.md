@@ -10,21 +10,56 @@
 composer require topthink/think-worker:^2.0
 ```
 
-#### tp6.0
+#### tp6.x
 
 ```bash
 composer require topthink/think-worker:^3.0
 ```
 
+#### tp8.x
+
+```bash
+composer require topthink/think-worker:^5.0
+```
+
 ### 使用
 
-#### 修改配置
+#### tp5/tp6 修改配置
 
 `/config/worker_server.php`
 
 ```php
 return [
     'worker_class' => ['wokmanchat\\websocket\\Index'],
+];
+```
+
+#### tp8 修改配置
+
+`/app/event.php`
+
+```php
+<?php
+// 事件定义文件
+return [
+    'bind'      => [
+    ],
+
+    'listen'    => [
+        'AppInit'  => [],
+        'HttpRun'  => [],
+        'HttpEnd'  => [],
+        'LogLevel' => [],
+        'LogWrite' => [],
+        // 新增worker.init事件，用于初始化worker
+        'worker.init' => [
+            'wokmanchat\\common\\WorkerInit',
+            //可以多个
+        ],
+    ],
+
+    'subscribe' => [
+    ],
 ];
 ```
 
@@ -38,7 +73,7 @@ return [
     'wokmanchat'  => [
         'handler'  => 'wokmanchat\\websocket\\Webman',
         'listen'  => 'websocket://0.0.0.0:22886',
-        'count' => 1, // 进程数
+        'count' => 1, // 进程数(只能为1)
         'user' => 'www',
         'group' => 'www',
     ],

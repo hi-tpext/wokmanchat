@@ -84,17 +84,17 @@ class Module  extends baseModule
      */
     public function install()
     {
-        if (!ExtLoader::isWebman() && !class_exists('\\think\\worker\\Server')) { //根据think-worker中某一个类是否存在来判断sdk是否已经安装
-
+        if (!ExtLoader::isWebman() && !class_exists('\\think\\worker\\Http')) { //根据think-worker中某一个类是否存在来判断sdk是否已经安装
             if (ExtLoader::isTP51()) {
-
-                $this->errors[] = new \Exception('<p>请使用composer安装think-worker后再安装本扩展！</p><pre>composer require topthink/think-worker:^2.*</pre>');
+                $this->errors[] = new \Exception('<p>请使用composer安装think-worker后再安装本扩展！</p><pre>composer require topthink/think-worker:^2.0</pre>');
+                return false;
+            } else if (ExtLoader::isTP80()) {
+                $this->errors[] = new \Exception('<p>请使用composer安装think-worker后再安装本扩展！</p><pre>composer require topthink/think-worker:^5.0</pre>');
+                return false;
             } else if (ExtLoader::isTP60()) {
-
-                $this->errors[] = new \Exception('<p>请使用composer安装think-worker后再安装本扩展！</p><pre>composer require topthink/think-worker:^3.*</pre>');
+                $this->errors[] = new \Exception('<p>请使用composer安装think-worker后再安装本扩展！</p><pre>composer require topthink/think-worker:^3.0</pre>');
+                return false;
             }
-
-            return false;
         }
 
         return parent::install();

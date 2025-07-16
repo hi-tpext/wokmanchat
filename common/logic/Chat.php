@@ -253,7 +253,7 @@ class Chat
 
                     $connection->send(json_encode(['do_action' => 'send_success']));
 
-                    $this->newMessageNotify($connection, $res);
+                    $this->newMessageNotify($connection, $userLogic, $res);
                 }
 
                 return $res;
@@ -277,7 +277,7 @@ class Chat
 
                     $connection->send(json_encode(['do_action' => 'create_room_success', 'new_session' => $res['session']]));
 
-                    $this->newMessageNotify($connection, $res);
+                    $this->newMessageNotify($connection, $userLogic, $res);
                 }
 
                 return $res;
@@ -301,7 +301,7 @@ class Chat
 
                     $connection->send(json_encode(['do_action' => 'create_room_success', 'new_session' => $res['session']]));
 
-                    $this->newMessageNotify($connection, $res);
+                    $this->newMessageNotify($connection, $userLogic, $res);
                 }
 
                 return $res;
@@ -326,7 +326,7 @@ class Chat
 
                     $connection->send(json_encode(['do_action' => 'add_user_to_room_success']));
 
-                    $this->newMessageNotify($connection, $res);
+                    $this->newMessageNotify($connection, $userLogic, $res);
                 }
 
                 return $res;

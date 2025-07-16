@@ -26,22 +26,9 @@ class ChatUser
 
     protected $config = [];
 
-    public function __construct()
+    public function __construct($config = [])
     {
-        $this->config = Module::getInstance()->getConfig();
-    }
-
-    /**
-     * 重置用户状态
-     *
-     * @return void
-     */
-    public function reset()
-    {
-        $this->app_id = 0;
-        $this->uid = 0;
-        $this->sys_uid = 0;
-        $this->user = null;
+        $this->config = $config; Module::getInstance()->getConfig();
     }
 
     /**

@@ -3,37 +3,25 @@
 namespace wokmanchat\common\logic;
 
 use think\Validate;
-use think\facade\Cache;
 use think\facade\Db;
 use think\facade\Log;
 use Workerman\Worker;
+use think\facade\Cache;
 use think\facade\Config;
 use tpext\common\ExtLoader;
 use wokmanchat\common\model;
 use wokmanchat\common\Module;
+use Workerman\Protocols\Http\Request;
 use think\exception\ValidateException;
 use Workerman\Connection\TcpConnection;
-use Workerman\Protocols\Http\Request;
 
 class Chat
 {
     public const HEARTBEAT_TIME = 60;
 
+    protected $config = [];
+
     protected $appConnections = [];
-
-    /**
-     * Undocumented variable
-     *
-     * @var ChatApp
-     */
-    protected $appLogic;
-
-    /**
-     * Undocumented variable
-     *
-     * @var ChatUser
-     */
-    protected $userLogic;
 
     /**
      * Undocumented variable
@@ -53,24 +41,22 @@ class Chat
      */
     public function onMessage($connection, $data = '{}')
     {
+        $chatUserLogic = new ChatUser($this->config);
+
         $connection->lastMessageTime = time();
 
         $data = json_decode($data, true);
 
         try {
 
-            $this->userLogic->reset();
-
-            $res = $this->handler($connection, $data);
-
-            if (isset($data['action']) && in_array($data['action'], ['send_by_session'])) {
-                $this->pushLogic->trigger($this->userLogic->getSelf(), $data, $res);
-            }
-
-            $this->userLogic->reset();
+            $res = $this->handler($connection, $chatUserLogic, $data);
 
             if ($res && $res['code'] != 1) {
                 $connection->send(json_encode(['do_action' => 'show_toast', 'text' => $res['msg']]));
+            } else {
+                if (in_array($data['action'], ['send_by_session'])) {
+                    $this->pushLogic->trigger($chatUserLogic->getSelf(), $data, $res);
+                }
             }
         } catch (\Throwable $e) {
             Log::error($e->__toString());
@@ -82,10 +68,10 @@ class Chat
     {
         Log::info("wokmanchat onWorkerStart");
 
+        $this->config = Module::getInstance()->getConfig();
+
         $this->initDb();
 
-        $this->appLogic = new ChatApp;
-        $this->userLogic = new ChatUser;
         $this->pushLogic = new Push;
 
         $this->heartBeat($worker);
@@ -97,10 +83,11 @@ class Chat
      * Undocumented function
      *
      * @param TcpConnection $connection
+     * @param ChatUser $userLogic
      * @param array $data
      * @return array|void
      */
-    protected function handler($connection, $data = [])
+    protected function handler($connection, $userLogic, $data = [])
     {
         if (!empty($data) && isset($data['action'])) {
             $res = ['code' => 0, 'msg' => '失败' . $data['action']];
@@ -119,7 +106,7 @@ class Chat
                     return ['code' => 0, 'msg' => $result];
                 }
 
-                $res = $this->userLogic->validateUser($data['app_id'], $data['uid'], $data['sign'], $data['time']);
+                $res = $userLogic->validateUser($data['app_id'], $data['uid'], $data['sign'], $data['time']);
 
                 if ($res['code'] == 1) {
 
@@ -149,7 +136,7 @@ class Chat
                         }
                     }
 
-                    $self = $this->userLogic->getSelf();
+                    $self = $userLogic->getSelf();
 
                     $connection->app_id = $self['app_id'];
                     $connection->uid = $data['uid'];
@@ -166,7 +153,7 @@ class Chat
                 return $res;
             } else if ($data['action'] == 'connect_to_user') {
 
-                if (!$this->switchUser($connection)) {
+                if (!$this->switchUser($connection, $userLogic)) {
                     return ['code' => 0, 'msg' => '账户异常'];
                 }
 
@@ -178,7 +165,7 @@ class Chat
                     return ['code' => 0, 'msg' => $result];
                 }
 
-                $res = $this->userLogic->connectToUser($data['to_uid']);
+                $res = $userLogic->connectToUser($data['to_uid']);
 
                 if ($res['code'] == 1) {
                     $connection->send(json_encode([
@@ -191,7 +178,7 @@ class Chat
                 return $res;
             } else if ($data['action'] == 'connect_to_session') {
 
-                if (!$this->switchUser($connection)) {
+                if (!$this->switchUser($connection, $userLogic)) {
                     return ['code' => 0, 'msg' => '账户异常'];
                 }
 
@@ -203,7 +190,7 @@ class Chat
                     return ['code' => 0, 'msg' => $result];
                 }
 
-                $res = $this->userLogic->connectToSession($data['session_id']);
+                $res = $userLogic->connectToSession($data['session_id']);
 
                 if ($res['code'] == 1) {
 
@@ -217,7 +204,7 @@ class Chat
                 return $res;
             } else if ($data['action'] == 'get_session_list') {
 
-                if (!$this->switchUser($connection)) {
+                if (!$this->switchUser($connection, $userLogic)) {
                     return ['code' => 0, 'msg' => '账户异常'];
                 }
 
@@ -232,7 +219,7 @@ class Chat
                     $data['pagesize'] = 20;
                 }
 
-                $res = $this->userLogic->getSessionList($data['skip'], $data['pagesize'], $data['kwd']);
+                $res = $userLogic->getSessionList($data['skip'], $data['pagesize'], $data['kwd']);
 
                 if ($res['code'] == 1) {
 
@@ -246,7 +233,7 @@ class Chat
                 return $res;
             } else if ($data['action'] == 'send_by_session') {
 
-                if (!$this->switchUser($connection)) {
+                if (!$this->switchUser($connection, $userLogic)) {
                     return ['code' => 0, 'msg' => '账户异常'];
                 }
 
@@ -260,7 +247,7 @@ class Chat
                     return ['code' => 0, 'msg' => $result];
                 }
 
-                $res = $this->userLogic->sendBySession($data['session_id'], $data['content'], $data['type']);
+                $res = $userLogic->sendBySession($data['session_id'], $data['content'], $data['type']);
 
                 if ($res['code'] == 1) {
 
@@ -272,7 +259,7 @@ class Chat
                 return $res;
             } else if ($data['action'] == 'create_room') {
 
-                if (!$this->switchUser($connection)) {
+                if (!$this->switchUser($connection, $userLogic)) {
                     return ['code' => 0, 'msg' => '账户异常'];
                 }
 
@@ -284,7 +271,7 @@ class Chat
                     return ['code' => 0, 'msg' => $result];
                 }
 
-                $res = $this->userLogic->createRoom($data['that_uid']);
+                $res = $userLogic->createRoom($data['that_uid']);
 
                 if ($res['code'] == 1) {
 
@@ -296,7 +283,7 @@ class Chat
                 return $res;
             } else if ($data['action'] == 'create_room_by_session') {
 
-                if (!$this->switchUser($connection)) {
+                if (!$this->switchUser($connection, $userLogic)) {
                     return ['code' => 0, 'msg' => '账户异常'];
                 }
 
@@ -308,7 +295,7 @@ class Chat
                     return ['code' => 0, 'msg' => $result];
                 }
 
-                $res = $this->userLogic->createRoomBySession($data['session_id']);
+                $res = $userLogic->createRoomBySession($data['session_id']);
 
                 if ($res['code'] == 1) {
 
@@ -320,7 +307,7 @@ class Chat
                 return $res;
             } else if ($data['action'] == 'add_user_to_room') {
 
-                if (!$this->switchUser($connection)) {
+                if (!$this->switchUser($connection, $userLogic)) {
                     return ['code' => 0, 'msg' => '账户异常'];
                 }
 
@@ -333,7 +320,7 @@ class Chat
                     return ['code' => 0, 'msg' => $result];
                 }
 
-                $res = $this->userLogic->addUserToRoom($data['room_session_id'], $data['that_uid']);
+                $res = $userLogic->addUserToRoom($data['room_session_id'], $data['that_uid']);
 
                 if ($res['code'] == 1) {
 
@@ -345,7 +332,7 @@ class Chat
                 return $res;
             } else if ($data['action'] == 'set_session_rank') {
 
-                if (!$this->switchUser($connection)) {
+                if (!$this->switchUser($connection, $userLogic)) {
                     return ['code' => 0, 'msg' => '账户异常'];
                 }
 
@@ -358,12 +345,12 @@ class Chat
                     return ['code' => 0, 'msg' => $result];
                 }
 
-                $res = $this->userLogic->setSessionRank($data['session_id'], $data['rank']);
+                $res = $userLogic->setSessionRank($data['session_id'], $data['rank']);
 
                 return $res;
             } else if ($data['action'] == 'get_history_message_list') {
 
-                if (!$this->switchUser($connection)) {
+                if (!$this->switchUser($connection, $userLogic)) {
                     return ['code' => 0, 'msg' => '账户异常'];
                 }
 
@@ -385,7 +372,7 @@ class Chat
                     $data['pagesize'] = 50;
                 }
 
-                $res = $this->userLogic->getMessageList($data['session_id'], true, $data['from_msg_id'], $data['pagesize']);
+                $res = $userLogic->getMessageList($data['session_id'], true, $data['from_msg_id'], $data['pagesize']);
 
                 if ($res['code'] == 1) {
                     $connection->send(json_encode([
@@ -424,7 +411,7 @@ class Chat
                 return $res;
             } else if ($data['action'] == 'get_new_message_list') {
 
-                if (!$this->switchUser($connection)) {
+                if (!$this->switchUser($connection, $userLogic)) {
                     return ['code' => 0, 'msg' => '账户异常'];
                 }
 
@@ -446,7 +433,7 @@ class Chat
                     $data['pagesize'] = 50;
                 }
 
-                $res = $this->userLogic->getMessageList($data['session_id'], false, $data['from_msg_id'], $data['pagesize']);
+                $res = $userLogic->getMessageList($data['session_id'], false, $data['from_msg_id'], $data['pagesize']);
 
                 if ($res['code'] == 1) {
                     $connection->send(json_encode([
@@ -471,9 +458,10 @@ class Chat
      * Undocumented function
      *
      * @param mixed $connection
+     * @param ChatUser $userLogic
      * @return boolean
      */
-    protected function switchUser($connection)
+    protected function switchUser($connection, $userLogic)
     {
         $app_id = $connection->app_id;
         $uid = $connection->uid;
@@ -487,7 +475,7 @@ class Chat
         $user = model\WokChatUser::where(['app_id' => $app_id, 'uid' => $uid])->find();
 
         if ($user) {
-            $this->userLogic->switchUser($user);
+            $userLogic->switchUser($user);
             return true;
         }
 
@@ -611,17 +599,18 @@ class Chat
      * Undocumented function
      *
      * @param TcpConnection $connection
+     * @param ChatUser $userLogic
      * @param mixed $res
      * @return void
      */
-    protected function newMessageNotify($connection, $res)
+    protected function newMessageNotify($connection, $userLogic, $res)
     {
         //$res ['code' => 1, 'msg' => '消息发送成功', 'session_id' => $session['id'], 'session' => $session, 'message_id' => $msg['id'], 'message' => $msg];
         $session = $res['session'];
         //
         if ($session['is_room']) { //如果是群聊
 
-            $uids = $this->userLogic->getRoomSessionUsers($session['sys_to_uid']); //获取群聊相关的所有人员uid列表
+            $uids = $userLogic->getRoomSessionUsers($session['sys_to_uid']); //获取群聊相关的所有人员uid列表
 
             foreach ($uids as $uid) {
                 $this->sendMessageByUid($session['app_id'], $uid, ['do_action' => 'new_message', 'session' => $session, 'from_uid' => $connection->uid]);

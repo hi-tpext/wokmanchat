@@ -71,6 +71,7 @@ return [
  return [
     //....其它配置，这里省略....
     'wokmanchat'  => [
+        //'eventLoop' => Workerman\Events\Swoole::class, //wbbman>=2.1 使用Swoole等事件驱动，支持协程
         'handler'  => 'wokmanchat\\websocket\\Webman',
         'listen'  => 'websocket://0.0.0.0:22886',
         'count' => 1, // 进程数(只能为1)

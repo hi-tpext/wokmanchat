@@ -22,6 +22,14 @@ composer require topthink/think-worker:^3.0
 composer require topthink/think-worker:^5.0
 ```
 
+### 安装 http-client（可选）
+
+#### 用于消息推送http请求。
+
+```bash
+composer require workerman/http-client
+```
+
 ### 使用
 
 #### tp5/tp6 修改配置

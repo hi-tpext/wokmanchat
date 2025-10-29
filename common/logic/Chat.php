@@ -452,6 +452,8 @@ class Chat
                 return ['code' => 0, 'msg' => '失败-' . $data['action']];
             }
         }
+
+        return ['code' => 0, 'msg' => '失败'];
     }
 
     /**
@@ -684,7 +686,7 @@ class Chat
         $this->innerTextWorker->count = $count;
         $this->innerTextWorker->reusePort = true;
 
-        $this->innerTextWorker->onMessage = function ($connection,  $data = '{}') use ($that) {
+        $this->innerTextWorker->onMessage = function ($connection, $data = '{}') use ($that) {
             $data = json_decode($data, true);
             if (!empty($data) && isset($data['action'])) {
                 if ($data['action'] == 'new_message_notify') { //通过管理员接口添加消息后，刷新聊天界面

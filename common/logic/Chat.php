@@ -465,9 +465,9 @@ class Chat
      */
     protected function switchUser($connection, $userLogic)
     {
-        $app_id = $connection->app_id;
-        $uid = $connection->uid;
-        $sys_uid = $connection->sys_uid;
+        $app_id = $connection->app_id ?? 0;
+        $uid = $connection->uid ?? 0;
+        $sys_uid = $connection->sys_uid ?? 0;
 
         if (!$app_id || !$uid || !$sys_uid) {
             //

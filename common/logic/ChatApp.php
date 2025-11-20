@@ -162,8 +162,8 @@ class ChatApp
                 'remark' => $this->filterEmoji($remark),
                 'avatar' => $avatar,
                 'token' => $token,
-                'auto_reply' => $auto_reply,
-                'auto_reply_offline' => $auto_reply_offline,
+                'auto_reply' => $auto_reply ?: $exist['auto_reply'],
+                'auto_reply_offline' => $auto_reply_offline ?: $exist['auto_reply'],
             ]);
 
             if ($res) {

@@ -83,7 +83,6 @@ class Wokchatadmin extends Controller
             'nickname|用户昵称' => 'require',
             //'remark|用户备注' => 'require',
             //'avatar|用户头像' => 'require',
-            //'token|用户token' => 'require'
             //'auto_reply|自动回复' => 'require'
             //'auto_reply_offline|自动回复[离线]' => 'require'
         ]);

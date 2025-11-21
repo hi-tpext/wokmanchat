@@ -2,9 +2,11 @@
 
 namespace wokmanchat\common\logic;
 
-use wokmanchat\common\model;
 use think\Db;
+use wokmanchat\common\model;
 use wokmanchat\common\Module;
+use tpext\builder\common\Module as BuilderModule;
+use tpext\builder\logic\Upload as UploadTool;
 
 /**
  * 封装前台操作，用户聊天
@@ -28,7 +30,8 @@ class ChatUser
 
     public function __construct($config = [])
     {
-        $this->config = $config; Module::getInstance()->getConfig();
+        $this->config = $config;
+        Module::getInstance()->getConfig();
     }
 
     /**
@@ -414,7 +417,7 @@ class ChatUser
             $this->switchUser($self);
         }
 
-        if ($res1 &&  $res2['code'] == 1 && $res3['code'] == 1) {
+        if ($res1 && $res2['code'] == 1 && $res3['code'] == 1) {
             Db::commit();
 
             return $res2;
@@ -754,7 +757,7 @@ class ChatUser
             return ['code' => 0, 'msg' => '会话不存在'];
         }
 
-        $res =  $session->save(['rank' => $rank]);
+        $res = $session->save(['rank' => $rank]);
 
         if ($res) {
             return ['code' => 1, 'msg' => '设置成功'];
@@ -840,9 +843,11 @@ class ChatUser
 
         $messages = model\WokChatMsg::where($where)
             ->order($orderBy)
-            ->with(['fromUser' => function ($query) use ($userFields) {
-                $query->field($userFields);
-            }])
+            ->with([
+                'fromUser' => function ($query) use ($userFields) {
+                    $query->field($userFields);
+                }
+            ])
             ->field($msgFields)
             ->limit(0, $pagesize)
             ->select();
@@ -1025,5 +1030,83 @@ class ChatUser
         }
 
         return 0;
+    }
+
+    /**
+     * 文件上传
+     * @param string $type 文件类型
+     * @return array
+     */
+    public function upfile($type)
+    {
+        $is_rand_name = 1;
+        $config = BuilderModule::getInstance()->getConfig();
+
+        if ($type == 'image') {
+            $_config['allowSuffix'] = ['jpg', 'jpeg', 'png', 'gif'];
+            $_config['maxSize'] = 1024 * 1024 * 1;
+        } else if ($type == 'audio') {
+            $_config['allowSuffix'] = ['m4a', 'mp3', 'wav', 'aac', 'ogg'];
+            $_config['maxSize'] = 1024 * 1024 * 10;
+        } else if ($type == 'video') {
+            $_config['allowSuffix'] = ['mp4', 'avi', 'mkv', 'mov', 'wmv'];
+            $_config['maxSize'] = 1024 * 1024 * 100;
+        } else {
+            $_config['allowSuffix'] = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
+            $_config['maxSize'] = 1024 * 1024 * 10;
+        }
+
+        if ($is_rand_name == 'n') {
+            $_config['isRandName'] = 0;
+        } else if ($is_rand_name == 'y') {
+            $_config['isRandName'] = 1;
+        } else {
+            $_config['isRandName'] = $config['is_rand_name'];
+        }
+
+        $_config['fileByDate'] = $config['file_by_date'];
+
+        $storageDriver = $config['storage_driver'];
+        $storageDriver = empty($storageDriver) || !class_exists($storageDriver)
+            ? \tpext\builder\logic\LocalStorage::class : $storageDriver;
+
+        $driver = new $storageDriver;
+        $_config['driver'] = $driver;
+        $_config['imageDriver'] = new \tpext\builder\logic\ImageHandler;
+        $_config['imageCommonds'] = [];
+        if ($config['image_water']) {
+            $_config['imageCommonds'][] = [
+                'name' => 'water',
+                'args' => ['imgPath' => $config['image_water'], 'position' => $config['image_water_position']],
+                'is_global_config' => 'image_water',
+            ];
+        }
+        if ($config['image_size_limit']) {
+            $arr = explode(',', $config['image_size_limit']);
+            if (count($arr) > 1 && (intval($arr[0]) > 0 || intval($arr[0]) > 0)) {
+                $_config['imageCommonds'][] = [
+                    'name' => 'resize',
+                    'args' => ['width' => intval($arr[0]) ?: null, 'height' => intval($arr[1]) ?: null],
+                    'is_global_config' => 'image_size_limit',
+                ];
+            }
+        }
+
+        $_config['user_id'] = $this->sys_uid;
+        $_config['dirName'] = 'wokchat/' . $this->app_id . '/' . $type; //存放路径
+        $up = new UploadTool($_config);
+        $newPath = $up->uploadFile('file');
+        if ($newPath === false) {
+            return [
+                'code' => 0,
+                'msg' => __blang('bilder_file_uploading_failed') . '-' . $up->errorInfo,
+            ];
+        } else {
+            return [
+                'code' => 1,
+                'url' => '//' . request()->host() . $newPath,
+                'file_path' => $newPath
+            ];
+        }
     }
 }

@@ -309,4 +309,18 @@ class Wokchatuser extends Controller
 
         return json($res);
     }
+
+    public function upfile($type = 'file')
+    {
+        $data = request()->post();
+
+        $valdate = $this->validateUser($data);
+        if ($valdate['code'] != 1) {
+            return json($valdate);
+        }
+
+        $res = $this->userLogic->upfile($type);
+
+        return json($res);
+    }
 }
